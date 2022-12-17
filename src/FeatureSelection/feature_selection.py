@@ -37,7 +37,6 @@ class FeatureSelection:
             'XGBoostRegressor': XGBRegressor(objective='reg:linear')
         }
         estimator_dict = {}
-        list_features = []
         importance_features_sorted_all = pd.DataFrame()
         for model_name, model in model_dict.items():
             model.fit(X_model, y_model)
