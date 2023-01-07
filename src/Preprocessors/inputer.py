@@ -9,10 +9,10 @@ from xgboost import XGBRegressor, XGBClassifier
 from sklearn.linear_model import SGDClassifier, LinearRegression
 
 
-class Imputer:
+class Inputer:
 
-    def __init__(self):
-        pass
+    def __init__(self, seed):
+        self.seed = seed
 
     @staticmethod
     def check_there_are_na_values(dataframe):
@@ -46,52 +46,52 @@ class Imputer:
         return normalized_dataframe
 
     @staticmethod
-    def linear_classifier(X_train, y_train, X_predict):
+    def linear_classifier(x_train, y_train, x_predict):
         linear_model = SGDClassifier(max_iter=1000, tol=1e-3)
-        linear_model.fit(X_train, y_train)
-        return linear_model.predict(X_predict)
+        linear_model.fit(x_train, y_train)
+        return linear_model.predict(x_predict)
 
     @staticmethod
-    def linear_regressor(X_train, y_train, X_predict):
+    def linear_regressor(x_train, y_train, x_predict):
         linear_model = LinearRegression()
-        linear_model.fit(X_train, y_train)
-        return linear_model.predict(X_predict)
+        linear_model.fit(x_train, y_train)
+        return linear_model.predict(x_predict)
 
     @staticmethod
-    def knn_classifier(X_train, y_train, X_predict):
+    def knn_classifier(x_train, y_train, x_predict):
         knn = KNeighborsClassifier(n_neighbors=5)
-        knn.fit(X_train, y_train)
-        return knn.predict(X_predict)
+        knn.fit(x_train, y_train)
+        return knn.predict(x_predict)
 
     @staticmethod
-    def knn_regressor(X_train, y_train, X_predict):
+    def knn_regressor(x_train, y_train, x_predict):
         knn = KNeighborsRegressor(n_neighbors=5)
-        knn.fit(X_train, y_train)
-        return knn.predict(X_predict)
+        knn.fit(x_train, y_train)
+        return knn.predict(x_predict)
 
     @staticmethod
-    def svm_classifier(X_train, y_train, X_predict):
+    def svm_classifier(x_train, y_train, x_predict):
         clf = svm.SVC(kernel='linear')
-        clf.fit(X_train, y_train)
-        return clf.predict(X_predict)
+        clf.fit(x_train, y_train)
+        return clf.predict(x_predict)
 
     @staticmethod
-    def svm_regressor(X_train, y_train, X_predict):
+    def svm_regressor(x_train, y_train, x_predict):
         clf = svm.SVR(kernel='rbf')
-        clf.fit(X_train, y_train)
-        return clf.predict(X_predict)
+        clf.fit(x_train, y_train)
+        return clf.predict(x_predict)
 
-    @staticmethod
-    def xgboost_classifier(X_train, y_train, X_predict):
-        model = XGBClassifier(n_estimators=1000, max_depth=7, eta=0.1, subsample=0.7, colsample_bytree=0.8)
-        model.fit(X_train, y_train)
-        return model.predict(X_predict)
+    def xgboost_classifier(self, x_train, y_train, x_predict):
+        model = XGBClassifier(n_estimators=1000, max_depth=7, eta=0.1, subsample=0.7, colsample_bytree=0.8,
+                              random_state=self.seed)
+        model.fit(x_train, y_train)
+        return model.predict(x_predict)
 
-    @staticmethod
-    def xgboost_regressor(X_train, y_train, X_predict):
-        model = XGBRegressor(n_estimators=1000, max_depth=7, eta=0.1, subsample=0.7, colsample_bytree=0.8)
-        model.fit(X_train, y_train)
-        return model.predict(X_predict)
+    def xgboost_regressor(self, x_train, y_train, x_predict):
+        model = XGBRegressor(n_estimators=1000, max_depth=7, eta=0.1, subsample=0.7, colsample_bytree=0.8,
+                             random_state=self.seed)
+        model.fit(x_train, y_train)
+        return model.predict(x_predict)
 
     def predict(self, dataframe, algorithm):
         if not self.check_there_are_na_values(dataframe):
@@ -106,30 +106,36 @@ class Imputer:
                 list_target_not_none = [np.nan if v is None else v for v in list_target]
                 index_na_values = [i for i, x in enumerate(list_target) if pd.isnull(x)]
                 index_no_na_values = list(set([i for i in range(len(list_target))]) - set(index_na_values))
-                X_train = df_no_na_normalized.iloc[index_no_na_values, :]
-                X_imput_na = df_no_na_normalized.iloc[index_na_values, :]
+                x_train = df_no_na_normalized.iloc[index_no_na_values, :]
+                x_imput_na = df_no_na_normalized.iloc[index_na_values, :]
                 y_train = [list_target_not_none[i] for i in index_no_na_values]
 
                 if any([True if isinstance(v, str) else False for v in list_target_not_none]):
                     # Use classifier algorithm
                     if algorithm == 'knn':
-                        input_res = self.knn_classifier(X_train, y_train, X_imput_na)
+                        input_res = self.knn_classifier(x_train, y_train, x_imput_na)
                     elif algorithm == 'linear':
-                        input_res = self.linear_classifier(X_train, y_train, X_imput_na)
+                        input_res = self.linear_classifier(x_train, y_train, x_imput_na)
                     elif algorithm == 'svm':
-                        input_res = self.svm_classifier(X_train, y_train, X_imput_na)
+                        input_res = self.svm_classifier(x_train, y_train, x_imput_na)
                     elif algorithm == 'xgboost':
-                        input_res = self.xgboost_classifier(X_train, y_train, X_imput_na)
+                        input_res = self.xgboost_classifier(x_train, y_train, x_imput_na)
                 else:
                     # Use regressor algorithm
                     if algorithm == 'knn':
-                        input_res = self.knn_regressor(X_train, y_train, X_imput_na)
+                        input_res = self.knn_regressor(x_train, y_train, x_imput_na)
                     elif algorithm == 'linear':
-                        input_res = self.linear_regressor(X_train, y_train, X_imput_na)
+                        input_res = self.linear_regressor(x_train, y_train, x_imput_na)
                     elif algorithm == 'svm':
-                        input_res = self.svm_regressor(X_train, y_train, X_imput_na)
+                        input_res = self.svm_regressor(x_train, y_train, x_imput_na)
                     elif algorithm == 'xgboost':
-                        input_res = self.xgboost_regressor(X_train, y_train, X_imput_na)
+                        input_res = self.xgboost_regressor(x_train, y_train, x_imput_na)
+                    elif algorithm == 'ensemble':
+                        knn_res = self.knn_regressor(x_train, y_train, x_imput_na)
+                        linear_res = self.linear_regressor(x_train, y_train, x_imput_na)
+                        svm_res = self.svm_regressor(x_train, y_train, x_imput_na)
+                        xgboost_res = self.xgboost_regressor(x_train, y_train, x_imput_na)
+                        [(g + h + j + k) / 4 for g, h, j, k in zip(knn_res, linear_res, svm_res, xgboost_res)]
 
                 j = 0
                 for i in range(len(list_target)):

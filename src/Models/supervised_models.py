@@ -1,70 +1,113 @@
 import numpy as np
 import pandas as pd
+import warnings
+warnings.filterwarnings('ignore')
 from scipy import stats
 from sklearn.feature_selection import RFE
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import cross_val_score, KFold, GridSearchCV, RandomizedSearchCV
 from sklearn.metrics import mean_squared_error
 import xgboost as xgb
+import lightgbm as lgb
 
 
 class SupervisedModel:
 
-    def __init__(self):
-        pass
+    def __init__(self, seed):
+        self.seed = seed
 
-    @staticmethod
-    def linear_model(X_train, y_train, seed=42):
-        folds = KFold(n_splits = 10, shuffle = True, random_state = seed)
+    def linear_model(self, x_train, y_train):
+        folds = KFold(n_splits=10, shuffle=True, random_state=self.seed)
         hyper_params = [{'n_features_to_select': list(range(1, 20))}]
         lm = LinearRegression()
-        lm.fit(X_train, y_train)
+        lm.fit(x_train, y_train)
         rfe = RFE(lm)
-        model_cv = GridSearchCV(estimator = rfe,
-                        param_grid = hyper_params,
-                        scoring= 'r2',
-                        cv = folds,
-                        verbose = 1,
-                        return_train_score=True)
-        model_cv.fit(X_train, y_train)
+        model_cv = GridSearchCV(estimator=rfe,
+                                param_grid=hyper_params,
+                                scoring='r2',
+                                cv=folds,
+                                verbose=0,
+                                return_train_score=True
+                                )
+        model_cv.fit(x_train, y_train)
         return model_cv
 
-    @staticmethod
-    def xgboost_model(X_train, y_train, seed=42):
+    def xgboost_model(self, x_train, y_train):
         param_dist = {'n_estimators': stats.randint(80, 150),
                       'learning_rate': [0.001, 0.01, 0.1],
                       'subsample': stats.uniform(0.3, 0.7),
                       'max_depth': [3, 6, 9],
                       'colsample_bytree': stats.uniform(0.5, 0.45),
-                      'min_child_weight': [1, 3]
+                      'min_child_weight': [1, 3],
+                      'seed': [self.seed]
                       }
-        clf_xgb = xgb.XGBRegressor(objective='reg:squarederror')
+        clf_xgb = xgb.XGBRegressor(objective='reg:squarederror', verbosity=0)
         clf = RandomizedSearchCV(clf_xgb, param_distributions=param_dist, n_iter=25, scoring='neg_mean_squared_error',
-                                 error_score=0, verbose=3, n_jobs=-1)
-        numFolds = 10
-        folds = KFold(n_splits=numFolds, shuffle=True)
+                                 error_score=0, verbose=0, n_jobs=-1, random_state=self.seed)
+        num_folds = 10
+        folds = KFold(n_splits=num_folds, shuffle=True)
         best_estimator = ['']
         current_mse = 2000
-        for train_index, test_index in folds.split(X_train):
-            X_train_model, X_test = X_train.iloc[train_index, :], X_train.iloc[test_index, :]
-            y_train_model, y_test = y_train[train_index], y_train[test_index]
-            clf.fit(X_train_model, list(y_train_model))
-            if mean_squared_error(y_test, clf.predict(X_test)) < current_mse:
+        for train_index, test_index in folds.split(x_train):
+            x_train_model, x_test = x_train.iloc[train_index, :], x_train.iloc[test_index, :]
+            y_train_model = [y_train[i] for i in train_index]
+            y_test = [y_train[i] for i in test_index]
+            clf.fit(x_train_model, list(y_train_model))
+            if mean_squared_error(y_test, clf.predict(x_test)) < current_mse:
                 best_estimator[0] = clf.best_estimator_
         clf = best_estimator[0]
-        clf.fit(X_train, list(y_train))
+        clf.fit(x_train, list(y_train))
         return clf
 
-    def predict(self, X_train, y_train, X_test, seed, algorithm='Linear'):
+    def lightgbm_model(self, x_train, y_train):
+        param_dist = {
+            'task': ['train'],
+            'boosting': ['gbdt'],
+            'objective': ['regression'],
+            'num_leaves': [10, 50, 100],
+            'learning_rate': [0.001, 0.01, 0.1],
+            'metric': ['l2', 'l1'],
+            'seed': [self.seed]
+        }
+        clf_lgb = lgb.LGBMRegressor(verbosity=0)
+        clf = RandomizedSearchCV(estimator=clf_lgb,
+                                 param_distributions=param_dist, cv=5,
+                                 n_iter=100,
+                                 verbose=0,
+                                 random_state=self.seed
+                                 )
+
+        num_folds = 10
+        folds = KFold(n_splits=num_folds, shuffle=True)
+        best_estimator = ['']
+        current_mse = 2000
+        for train_index, test_index in folds.split(x_train):
+            x_train_model, x_test = x_train.iloc[train_index, :], x_train.iloc[test_index, :]
+            y_train_model = [y_train[i] for i in train_index]
+            y_test = [y_train[i] for i in test_index]
+            clf.fit(x_train_model, list(y_train_model))
+            if mean_squared_error(y_test, clf.predict(x_test)) < current_mse:
+                best_estimator[0] = clf.best_estimator_
+        clf = best_estimator[0]
+        clf.fit(x_train, list(y_train))
+        return clf
+
+    def predict(self, x_train, y_train, x_test, seed, algorithm='Linear'):
         if algorithm == 'Linear':
-            model = self.linear_model(X_train, y_train, seed)
-            return model.predict(X_test)
+            model = self.linear_model(x_train, y_train)
+            return list(model.predict(x_test))
         elif algorithm == 'XGBoost':
-            model = self.xgboost_model(X_train, y_train, seed)
-            return model.predict(X_test)
+            model = self.xgboost_model(x_train, y_train)
+            return list(model.predict(x_test))
+        elif algorithm == 'LightGBM':
+            model = self.lightgbm_model(x_train, y_train)
+            return list(model.predict(x_test))
         elif algorithm == 'Ensemble':
-            model_linear = self.linear_model(X_train, y_train, seed)
-            model_xgboost = self.xgboost_model(X_train, y_train, seed)
-            res_linear = model_linear.predict(X_test)
-            res_xgboost = model_xgboost.predict(X_test)
-            return [(g + h) / 2 for g, h in zip(res_linear, res_xgboost)]
+            model_linear = self.linear_model(x_train, y_train)
+            model_xgboost = self.xgboost_model(x_train, y_train)
+            model_lightgbm = self.lightgbm_model(x_train, y_train)
+            res_linear = model_linear.predict(x_test)
+            res_xgboost = model_xgboost.predict(x_test)
+            res_lightgbm = model_lightgbm.predict(x_test)
+            return [(g + h + j) / 3 for g, h, j in zip(res_linear, res_xgboost, res_lightgbm)]
+

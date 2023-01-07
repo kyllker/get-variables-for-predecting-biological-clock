@@ -16,8 +16,8 @@ sys.path.append(project_dir)
 
 class FeatureSelection:
 
-    def __init__(self):
-        pass
+    def __init__(self, seed):
+        self.seed = seed
 
     @staticmethod
     def drop_columns_little_variance(dataframe, threshold_variance):
@@ -26,20 +26,19 @@ class FeatureSelection:
         df_columns_big_variance = dataframe[dataframe.columns[selector.get_support(indices=True)]]
         return df_columns_big_variance
 
-    @staticmethod
-    def feature_selection_with_ml_algorithms(dataframe, target, threshold_importance):
+    def feature_selection_with_ml_algorithms(self, dataframe, target, threshold_importance):
         df_aux = dataframe.copy()
-        X_model, X_valid, y_model, y_valid = train_test_split(df_aux, target, random_state=42, test_size=0.2)
+        x_model, x_valid, y_model, y_valid = train_test_split(df_aux, target, random_state=self.seed, test_size=0.2)
         model_dict = {
             'SVM': SVR(kernel='linear'),
             'LinearRegression': LinearRegression(),
-            'RandomForestRegressor': RandomForestRegressor(random_state=42, n_jobs=-1),
-            'XGBoostRegressor': XGBRegressor(objective='reg:linear')
+            'RandomForestRegressor': RandomForestRegressor(random_state=self.seed, n_jobs=-1),
+            'XGBoostRegressor': XGBRegressor(objective='reg:squarederror', random_state=self.seed)
         }
         estimator_dict = {}
         importance_features_sorted_all = pd.DataFrame()
         for model_name, model in model_dict.items():
-            model.fit(X_model, y_model)
+            model.fit(x_model, y_model)
             if (model_name == 'LinearRegression') or (model_name == 'SVM'):
                 importance_values = np.absolute(model.coef_)
             else:

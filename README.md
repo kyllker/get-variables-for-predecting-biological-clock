@@ -87,6 +87,10 @@ I choose the following models:
     
     - XGBoost
 
+    - LightGBM
+
+    - Ensemble with the same importance
+
 
 We choose the best hyperparameters and we can ensemble both of them
 
