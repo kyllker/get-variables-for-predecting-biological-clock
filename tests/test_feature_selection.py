@@ -12,7 +12,8 @@ from src.FeatureSelection.feature_selection import FeatureSelection
 class TestFeatureSelection:
     def setup_class(self):
 
-        self.feature_selection_object = FeatureSelection()
+        self.seed = 42
+        self.feature_selection_object = FeatureSelection(self.seed)
 
         self.df = pd.DataFrame([[1, 1, 2], [1.001, 2, 4]], columns=['A', 'B', 'C'])
 
@@ -28,8 +29,8 @@ class TestFeatureSelection:
         assert self.feature_selection_object.drop_columns_little_variance(self.df, 0.05).equals(df_res)
 
     def test_feature_selection_with_ml_algorithms(self):
-        X, y = load_iris(return_X_y=True)
-        df_iris = pd.DataFrame(data=np.c_[X, y],
+        x, y = load_iris(return_X_y=True)
+        df_iris = pd.DataFrame(data=np.c_[x, y],
                                columns=self.iris['feature_names'] + ['target'])
 
         df_res = self.feature_selection_object.feature_selection_with_ml_algorithms(df_iris.iloc[:,:-1], y, 0.3)

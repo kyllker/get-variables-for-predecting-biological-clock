@@ -6,13 +6,13 @@ import numbers
 import numpy as np
 project_dir = os.path.join(os.path.dirname(__file__), '..', 'detect_fitbit_features')
 sys.path.append(project_dir)
-from src.Preprocessors.imputer import Imputer
+from src.Preprocessors.inputer import Inputer
 
 
 class Cleaner:
 
-    def __init__(self):
-        self.imputer = Imputer()
+    def __init__(self, seed):
+        self.inputer = Inputer(seed)
 
     @staticmethod
     def filter_desired_columns(dataframe, list_columns_with_order):
@@ -111,7 +111,7 @@ class Cleaner:
         dataframe_desired_columns = self.filter_desired_columns(dataframe, list_columns_with_order)
         dataframe_numerical_values = \
             self.convert_to_numerical_values_column_with_two_different_values(dataframe_desired_columns)
-        dataframe_no_na = self.imputer.predict(dataframe_numerical_values, algorithm)
+        dataframe_no_na = self.inputer.predict(dataframe_numerical_values, algorithm)
         dataframe_numerical_values = \
             self.convert_to_numerical_values_column_with_two_different_values(dataframe_no_na)
         dataframe_only_numerical_values = \

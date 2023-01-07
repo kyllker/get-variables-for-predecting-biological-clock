@@ -10,8 +10,8 @@ from src.Preprocessors.cleaner import Cleaner
 
 class TestCleaner:
     def setup_class(self):
-
-        self.cleaner_object = Cleaner()
+        self.seed = 42
+        self.cleaner_object = Cleaner(self.seed)
 
         self.df = pd.DataFrame([[1, 1], [1, 2]], columns=['A', 'B'])
 
@@ -22,7 +22,7 @@ class TestCleaner:
 
     def test__checker_filter_valid_columns(self):
         dataframe_desired_columns = self.cleaner_object.filter_desired_columns(self.df, [0])
-        assert dataframe_desired_columns.equals(pd.DataFrame([[1],[1]], columns=['A']))
+        assert dataframe_desired_columns.equals(pd.DataFrame([[1], [1]], columns=['A']))
 
     def test__checker_filter_not_valid_columns(self):
         dataframe_desired_columns = self.cleaner_object.filter_desired_columns(self.df, [0, 2])
@@ -51,7 +51,8 @@ class TestCleaner:
         assert df2.equals(dataframe_drop_constant_columns)
 
     def test__convert_to_numerical_values_column_with_two_different_values(self):
-        dataframe_convert_numerical_columns = self.cleaner_object.convert_to_numerical_values_column_with_two_different_values(self.df_no_numerical)
+        dataframe_convert_numerical_columns = \
+            self.cleaner_object.convert_to_numerical_values_column_with_two_different_values(self.df_no_numerical)
         print(dataframe_convert_numerical_columns)
         df_numeric = pd.DataFrame([[0, 0], [1, 1]], columns=['A_a1_c0', 'B_b1_d0'])
         assert np.array_equal(dataframe_convert_numerical_columns.to_numpy(), df_numeric.to_numpy())

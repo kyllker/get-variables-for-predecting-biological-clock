@@ -22,7 +22,7 @@ src has the following structure:
     - Preprocessors: It is the folder with the scripts about clean and imput variables
 
 
-tests: in this folder there is a script to test the whole flow and get results
+tests: in this folder there is a script to test the whole flow and get results, proof_code.py is called 
 
 
 There are also:
@@ -86,6 +86,10 @@ I choose the following models:
     - Linear
     
     - XGBoost
+
+    - LightGBM
+
+    - Ensemble with the same importance
 
 
 We choose the best hyperparameters and we can ensemble both of them
