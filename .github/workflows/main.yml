@@ -36,4 +36,4 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=150 --statistics
     - name: Test with pytest
       run: |
-        pytest tests/test_cleaner.py::TestCleaner::test_build_a_cleaner_object
+        pytest tests/
