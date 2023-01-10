@@ -95,6 +95,17 @@ I choose the following models:
 We choose the best hyperparameters and we can ensemble both of them
 
 
+## Step4: METRICS, RMSE AND GRAPHICS
+
+As it is a regression model, we choose rmse as metric and we can show results in a graphic too
+
+Files are in:
+
+    - src/Results/graphics.png
+
+    - src/Results/PredictedVsTrue.csv
+
+
 ## RESULTS
 
 In progress
