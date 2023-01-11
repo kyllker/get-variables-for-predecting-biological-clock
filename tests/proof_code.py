@@ -19,9 +19,9 @@ list_columns.extend(sublist_1)
 list_columns.extend(sublist_2)
 print('Desired columns done')
 if 'tests' in os.getcwd():
-    xl_file = pd.ExcelFile(os.path.join('..', 'src', 'Data', filename))
+    xl_file = pd.ExcelFile(os.path.join('..', 'Data', filename))
 else:
-    xl_file = pd.ExcelFile(os.path.join('src', 'Data', filename))
+    xl_file = pd.ExcelFile(os.path.join('Data', filename))
 dfs = {sheet_name: xl_file.parse(sheet_name) for sheet_name in xl_file.sheet_names}
 df = dfs[sheet]
 target = list(df['DNAmGrimAge'])[:60]
@@ -34,11 +34,11 @@ algorithms_supervised = ['Linear', 'XGBoost', 'LightGBM', 'Ensemble']
 seed = 42
 ensemble_object = Ensemble(seed)
 
-# Params predict ensemble: filename, sheet, list_columns, target, algorithm_imput,
+# Params predict ensemble: filename, sheet, list_columns, target, algorithm_input,
 #                          threshold_variance=0.05, threshold_importance=0.3, seed=42,
 #                          algorithm_supervised='Linear'
 # Possible values:
-#       algorithm_imput: ['knn', 'linear', 'svm', 'xgboost', 'ensemble']
+#       algorithm_input: ['knn', 'linear', 'svm', 'xgboost', 'ensemble']
 #       algorithm_supervised: ['Linear', 'XGBoost', 'LightGBM', 'Ensemble']
 
 proof_one_model = True
@@ -82,6 +82,7 @@ else:
                             'algorithm_supervised': algorithm_supervised
                         }
     # Launch the best
+    print(best_parameters)
     rmse = ensemble_object.predict(filename=filename,
                                    sheet=sheet,
                                    list_columns=list_columns,
