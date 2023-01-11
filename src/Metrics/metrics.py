@@ -36,11 +36,14 @@ class Metrics:
         for i in range(len(list(df_results['Predict']))):
             err = (list(df_results['Predict'])[i] - list(df_results['True'])[i]) ** 2
             errors.append(err)
+        f = pyplot.figure()
         pyplot.plot(errors)
         pyplot.xticks(ticks=[i for i in range(len(errors))], labels=list(df_results['Predict']))
         pyplot.xlabel('Predicted Value')
         pyplot.ylabel('Mean Squared Error')
         pyplot.savefig(os.path.join('Results', 'graphics.png'))
+        f.clear()
+        pyplot.close(f)
 
         return rmse
 

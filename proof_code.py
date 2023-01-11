@@ -18,10 +18,10 @@ sublist_2 = [i for i in range(2550, 2616)]
 list_columns.extend(sublist_1)
 list_columns.extend(sublist_2)
 print('Desired columns done')
-if 'tests' in os.getcwd():
-    xl_file = pd.ExcelFile(os.path.join('..', 'Data', filename))
-else:
-    xl_file = pd.ExcelFile(os.path.join('Data', filename))
+
+
+xl_file = pd.ExcelFile(os.path.join('Data', filename))
+
 dfs = {sheet_name: xl_file.parse(sheet_name) for sheet_name in xl_file.sheet_names}
 df = dfs[sheet]
 target = list(df['DNAmGrimAge'])[:60]
