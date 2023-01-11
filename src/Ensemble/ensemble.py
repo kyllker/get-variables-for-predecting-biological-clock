@@ -23,9 +23,9 @@ class Ensemble:
     @staticmethod
     def read_data(filename, sheet):
         if 'tests' in os.getcwd():
-            xl_file = pd.ExcelFile(os.path.join('..', 'src', 'Data', filename))
+            xl_file = pd.ExcelFile(os.path.join('..', 'Data', filename))
         else:
-            xl_file = pd.ExcelFile(os.path.join('src', 'Data', filename))
+            xl_file = pd.ExcelFile(os.path.join('Data', filename))
 
         dfs = {sheet_name: xl_file.parse(sheet_name)
                for sheet_name in xl_file.sheet_names}

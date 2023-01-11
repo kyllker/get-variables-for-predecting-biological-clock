@@ -28,7 +28,7 @@ class Metrics:
         df_results = df_results.sort_values(by=['Predict'])
         print('Results shape')
         print(df_results.shape)
-        df_results.to_csv(os.path.join('src', 'Results', 'PredictedVsTrue.csv'), index=False)
+        df_results.to_csv(os.path.join('Results', 'PredictedVsTrue.csv'), index=False)
         print(df_results)
         rmse = math.sqrt(mean_squared_error(list(df_results['Predict']), list(df_results['True'])))
         print('El rmse entre el ' + algorithm_supervised + ' model y el reloj biológico DNAmGrimAge es: ' + str(rmse))
@@ -40,7 +40,7 @@ class Metrics:
         pyplot.xticks(ticks=[i for i in range(len(errors))], labels=list(df_results['Predict']))
         pyplot.xlabel('Predicted Value')
         pyplot.ylabel('Mean Squared Error')
-        pyplot.savefig(os.path.join('src', 'Results', 'graphics.png'))
+        pyplot.savefig(os.path.join('Results', 'graphics.png'))
 
         return rmse
 
