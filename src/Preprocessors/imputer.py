@@ -6,10 +6,10 @@ import numpy as np
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn import svm
 from xgboost import XGBRegressor, XGBClassifier
-from sklearn.linear_model import SGDClassifier, LinearRegression
+from sklearn.linear_model import SGDClassifier, LinearRegression, LogisticRegression
 
 
-class Inputer:
+class Imputer:
 
     def __init__(self, seed):
         self.seed = seed
@@ -46,6 +46,16 @@ class Inputer:
         return normalized_dataframe
 
     @staticmethod
+    def mean_or_mode_classifier(_, y_train, x_predict):
+        mode_list = max(set(y_train), key=y_train.count)
+        return [mode_list for _ in range(x_predict.shape[0])]
+
+    @staticmethod
+    def mean_or_mode_regressor(_, y_train, x_predict):
+        mean_list = sum(y_train) / len(y_train)
+        return [mean_list for _ in range(x_predict.shape[0])]
+
+    @staticmethod
     def linear_classifier(x_train, y_train, x_predict):
         linear_model = SGDClassifier(max_iter=1000, tol=1e-3)
         linear_model.fit(x_train, y_train)
@@ -56,6 +66,17 @@ class Inputer:
         linear_model = LinearRegression()
         linear_model.fit(x_train, y_train)
         return linear_model.predict(x_predict)
+
+    @staticmethod
+    def logistic_regressor(x_train, y_train, x_predict):
+        logistic_model = LogisticRegression(C=1.0, class_weight=None, dual=False, fit_intercept=True,
+                                            intercept_scaling=1, l1_ratio=None, max_iter=100,
+                                            multi_class='auto', n_jobs=None, penalty='l2',
+                                            random_state=None, solver='lbfgs', tol=0.0001, verbose=0,
+                                            warm_start=False)
+
+        logistic_model.fit(x_train, y_train)
+        return logistic_model.predict(x_predict)
 
     @staticmethod
     def knn_classifier(x_train, y_train, x_predict):
@@ -112,35 +133,50 @@ class Inputer:
 
                 if any([True if isinstance(v, str) else False for v in list_target_not_none]):
                     # Use classifier algorithm
-                    if algorithm == 'knn':
-                        input_res = self.knn_classifier(x_train, y_train, x_imput_na)
+                    if algorithm == 'mean_mode':
+                        imput_res = self.mean_or_mode_classifier(x_train, y_train, x_imput_na)
+                    elif algorithm == 'knn':
+                        imput_res = self.knn_classifier(x_train, y_train, x_imput_na)
                     elif algorithm == 'linear':
-                        input_res = self.linear_classifier(x_train, y_train, x_imput_na)
+                        imput_res = self.linear_classifier(x_train, y_train, x_imput_na)
+                    elif algorithm == 'logistic':
+                        imput_res = self.linear_classifier(x_train, y_train, x_imput_na)
                     elif algorithm == 'svm':
-                        input_res = self.svm_classifier(x_train, y_train, x_imput_na)
+                        imput_res = self.svm_classifier(x_train, y_train, x_imput_na)
                     elif algorithm == 'xgboost':
-                        input_res = self.xgboost_classifier(x_train, y_train, x_imput_na)
+                        imput_res = self.xgboost_classifier(x_train, y_train, x_imput_na)
+                    elif algorithm == 'ensemble':
+                        imput_res = self.knn_classifier(x_train, y_train, x_imput_na)
+
                 else:
                     # Use regressor algorithm
-                    if algorithm == 'knn':
-                        input_res = self.knn_regressor(x_train, y_train, x_imput_na)
+                    if algorithm == 'mean_mode':
+                        imput_res = self.mean_or_mode_regressor(x_train, y_train, x_imput_na)
+                    elif algorithm == 'knn':
+                        imput_res = self.knn_regressor(x_train, y_train, x_imput_na)
                     elif algorithm == 'linear':
-                        input_res = self.linear_regressor(x_train, y_train, x_imput_na)
+                        imput_res = self.linear_regressor(x_train, y_train, x_imput_na)
+                    elif algorithm == 'logistic':
+                        imput_res = self.logistic_regressor(x_train, y_train, x_imput_na)
                     elif algorithm == 'svm':
-                        input_res = self.svm_regressor(x_train, y_train, x_imput_na)
+                        imput_res = self.svm_regressor(x_train, y_train, x_imput_na)
                     elif algorithm == 'xgboost':
-                        input_res = self.xgboost_regressor(x_train, y_train, x_imput_na)
+                        imput_res = self.xgboost_regressor(x_train, y_train, x_imput_na)
                     elif algorithm == 'ensemble':
+                        mean_mode_res = self.mean_or_mode_regressor(x_train, y_train, x_imput_na)
                         knn_res = self.knn_regressor(x_train, y_train, x_imput_na)
                         linear_res = self.linear_regressor(x_train, y_train, x_imput_na)
+                        logistic_res = self.logistic_regressor(x_train, y_train, x_imput_na)
                         svm_res = self.svm_regressor(x_train, y_train, x_imput_na)
                         xgboost_res = self.xgboost_regressor(x_train, y_train, x_imput_na)
-                        [(g + h + j + k) / 4 for g, h, j, k in zip(knn_res, linear_res, svm_res, xgboost_res)]
+                        [(g + h + j + k + l + m) / 6
+                         for g, h, j, k, l, m in zip(mean_mode_res, knn_res, linear_res,
+                                                     logistic_res, svm_res, xgboost_res)]
 
                 j = 0
                 for i in range(len(list_target)):
                     if i in index_na_values:
-                        list_target[i] = input_res[j]
+                        list_target[i] = imput_res[j]
                         j = j + 1
                 dataframe.loc[:, column_na] = list_target
 
