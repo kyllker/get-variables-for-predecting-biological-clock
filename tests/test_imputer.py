@@ -8,13 +8,13 @@ from sklearn.datasets import load_iris
 project_dir = os.path.join(os.path.dirname(__file__), '..')
 sys.path.append(project_dir)
 
-from src.Preprocessors.imputer import imputer
+from src.Preprocessors.imputer import Imputer
 
 
 class Testimputer:
     def setup_class(self):
         self.seed = 42
-        self.imputer_object = imputer(self.seed)
+        self.imputer_object = Imputer(self.seed)
 
         self.df = pd.DataFrame([[1, 1], [1, 2]], columns=['A', 'B'])
 
