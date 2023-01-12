@@ -25,7 +25,7 @@ class Testimputer:
         self.iris = load_iris()
 
     def test_build_an_imputer_object(self):
-        assert isinstance(self.imputer_object, imputer)
+        assert isinstance(self.imputer_object, Imputer)
 
     def test_check_there_are_na_values_false(self):
         assert not self.imputer_object.check_there_are_na_values(self.df)
