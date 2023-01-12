@@ -3,26 +3,32 @@
 
 ## STRUCTURE
 
-There are two main folders: src and tests. Tests is only for check the code
-
-src has the following structure:
+There are these folders: Data, Results, src and tests.
 
     - Data: this folder is empty in github but you have to move your xlsx to this folder
+
+    - Results: 
+
+        - Prediction and true patients in csv
+
+        - Graphic with result
+
+    - src has the following structure:
+ 
+        - Ensemble: It is the main class in this project. This executes the steps from full process of ML
     
-    - Ensemble: It is the main class in this project. This executes the steps from full process of ML
+        - experimental_notebook: fast proofs for understanding the problem to resolve
     
-    - experimental_notebook: fast proofs for understanding the problem to resolve
+        - FeatureSelection: It is the step where you reduce the features to get the most important features
+     
+        - Models: It is the folder where you execute models about predictions when the data is cleaned
     
-    - FeatureSelection: It is the step where you reduce the features to get the most important features
-    
-    - model_store: It is the folder where you save the best models about feature selection and predictions
-    
-    - Models: It is the folder where you execute models about predictions when the data is cleaned
-    
-    - Preprocessors: It is the folder with the scripts about clean and imput variables
+        - Preprocessors: It is the folder with the scripts about clean and imput variables
 
 
-tests: in this folder there is a script to test the whole flow and get results, proof_code.py is called 
+    - tests: test for trying functions with base cases
+
+    - proof_code.py:  script to test the whole flow and get results 
 
 
 There are also:
@@ -101,11 +107,11 @@ As it is a regression model, we choose rmse as metric and we can show results in
 
 Files are in:
 
-    - src/Results/graphics.png
+    - Results/graphics.png
 
-    - src/Results/PredictedVsTrue.csv
+    - Results/PredictedVsTrue.csv
 
 
 ## RESULTS
 
-In progress
+Best result is in progress

@@ -27,6 +27,7 @@ class FeatureSelection:
         return df_columns_big_variance
 
     def feature_selection_with_ml_algorithms(self, dataframe, target, threshold_importance):
+        # Probar los modelos por separado y con el ensemble dejarlo como está aquí
         df_aux = dataframe.copy()
         x_model, x_valid, y_model, y_valid = train_test_split(df_aux, target, random_state=self.seed, test_size=0.2)
         model_dict = {
