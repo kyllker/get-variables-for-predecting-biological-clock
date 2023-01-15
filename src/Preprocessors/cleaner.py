@@ -108,7 +108,9 @@ class Cleaner:
         return normalized_dataframe
 
     def predict(self, dataframe, list_columns_with_order, algorithm='knn'):
-        dataframe_desired_columns = self.filter_desired_columns(dataframe, list_columns_with_order)
+        id_muestra = pd.DataFrame(dataframe['ID_Muestra'])
+        dataframe_no_id = dataframe.drop('ID_Muestra', axis=1)
+        dataframe_desired_columns = self.filter_desired_columns(dataframe_no_id, list_columns_with_order)
         dataframe_numerical_values = \
             self.convert_to_numerical_values_column_with_two_different_values(dataframe_desired_columns)
         dataframe_no_na = self.imputer.predict(dataframe_numerical_values, algorithm)
@@ -120,5 +122,5 @@ class Cleaner:
         dataframe_remove_constant_columns = self.remove_constant_columns(dataframe_remove_duplicate_columns)
 
         dataframe_normalized = self.normalize_dataframe(dataframe_remove_constant_columns)
-
-        return dataframe_normalized
+        cleaned_dataframe = pd.concat([id_muestra, dataframe_normalized], 1)
+        return cleaned_dataframe

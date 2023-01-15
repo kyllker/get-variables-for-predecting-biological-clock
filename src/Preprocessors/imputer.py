@@ -86,9 +86,13 @@ class Imputer:
 
     @staticmethod
     def knn_regressor(x_train, y_train, x_predict):
-        knn = KNeighborsRegressor(n_neighbors=5)
-        knn.fit(x_train, y_train)
-        return knn.predict(x_predict)
+        if len(y_train) < 5:
+            y_res = [sum(y_train) / len(y_train) for _ in range(x_predict.shape[0])]
+        else:
+            knn = KNeighborsRegressor(n_neighbors=5)
+            knn.fit(x_train, y_train)
+            y_res = knn.predict(x_predict)
+        return y_res
 
     @staticmethod
     def svm_classifier(x_train, y_train, x_predict):
