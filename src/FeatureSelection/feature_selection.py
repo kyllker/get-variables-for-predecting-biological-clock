@@ -39,6 +39,7 @@ class FeatureSelection:
         estimator_dict = {}
         importance_features_sorted_all = pd.DataFrame()
         for model_name, model in model_dict.items():
+            x_model = x_model.astype(float)
             model.fit(x_model, y_model)
             if (model_name == 'LinearRegression') or (model_name == 'SVM'):
                 importance_values = np.absolute(model.coef_)
@@ -61,7 +62,11 @@ class FeatureSelection:
         return dataframe.loc[:, selection_features]
 
     def predict(self, dataframe, target, threshold_variance=0.05, threshold_importance=0.3):
-        dataframe_big_variance = self.drop_columns_little_variance(dataframe, threshold_variance)
+        id_muestra = pd.DataFrame(dataframe['ID_Muestra'])
+        dataframe_no_id = dataframe.drop('ID_Muestra', axis=1)
+        dataframe_big_variance = self.drop_columns_little_variance(dataframe_no_id, threshold_variance)
         dataframe_ml_selection = \
             self.feature_selection_with_ml_algorithms(dataframe_big_variance, target, threshold_importance)
-        return dataframe_ml_selection
+
+        cleaned_dataframe = pd.concat([id_muestra, dataframe_ml_selection], 1)
+        return cleaned_dataframe

@@ -93,21 +93,24 @@ class SupervisedModel:
         return clf
 
     def predict(self, x_train, y_train, x_test, seed, algorithm='Linear'):
+        x_train_no_id = x_train.drop('ID_Muestra', axis=1)
+        id_muestra_test = list(x_test['ID_Muestra'])
+        x_test_no_id = x_test.drop('ID_Muestra', axis=1)
         if algorithm == 'Linear':
-            model = self.linear_model(x_train, y_train)
-            return list(model.predict(x_test))
+            model = self.linear_model(x_train_no_id, y_train)
+            return [id_muestra_test, list(model.predict(x_test_no_id))]
         elif algorithm == 'XGBoost':
-            model = self.xgboost_model(x_train, y_train)
-            return list(model.predict(x_test))
+            model = self.xgboost_model(x_train_no_id, y_train)
+            return [id_muestra_test, list(model.predict(x_test_no_id))]
         elif algorithm == 'LightGBM':
-            model = self.lightgbm_model(x_train, y_train)
-            return list(model.predict(x_test))
+            model = self.lightgbm_model(x_train_no_id, y_train)
+            return [id_muestra_test, list(model.predict(x_test_no_id))]
         elif algorithm == 'Ensemble':
-            model_linear = self.linear_model(x_train, y_train)
-            model_xgboost = self.xgboost_model(x_train, y_train)
-            model_lightgbm = self.lightgbm_model(x_train, y_train)
-            res_linear = model_linear.predict(x_test)
-            res_xgboost = model_xgboost.predict(x_test)
-            res_lightgbm = model_lightgbm.predict(x_test)
-            return [(g + h + j) / 3 for g, h, j in zip(res_linear, res_xgboost, res_lightgbm)]
-
+            model_linear = self.linear_model(x_train_no_id, y_train)
+            model_xgboost = self.xgboost_model(x_train_no_id, y_train)
+            model_lightgbm = self.lightgbm_model(x_train_no_id, y_train)
+            res_linear = model_linear.predict(x_test_no_id)
+            res_xgboost = model_xgboost.predict(x_test_no_id)
+            res_lightgbm = model_lightgbm.predict(x_test_no_id)
+            predictions = [(g + h + j) / 3 for g, h, j in zip(res_linear, res_xgboost, res_lightgbm)]
+            return [id_muestra_test, predictions]

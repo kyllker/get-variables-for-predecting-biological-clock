@@ -12,11 +12,12 @@ from src.Ensemble.ensemble import Ensemble
 filename = 'Dataset_Masterfile.xlsx'
 sheet = '1_Var_CatYNum'
 
-list_columns = [1]
+list_columns = [0, 1]
 sublist_1 = [i for i in range(61, 204)]
 sublist_2 = [i for i in range(2550, 2616)]
 list_columns.extend(sublist_1)
 list_columns.extend(sublist_2)
+print(list_columns)
 print('Desired columns done')
 
 
@@ -25,6 +26,7 @@ xl_file = pd.ExcelFile(os.path.join('Data', filename))
 dfs = {sheet_name: xl_file.parse(sheet_name) for sheet_name in xl_file.sheet_names}
 df = dfs[sheet]
 target = list(df['DNAmGrimAge'])[:60]
+
 print('Readed target')
 algorithms_imput = ['mean_mode', 'knn', 'linear', 'logistic', 'svm', 'xgboost', 'ensemble']
 threshold_variances = [0.01, 0.05, 0.07]
@@ -41,12 +43,13 @@ ensemble_object = Ensemble(seed)
 #       algorithm_imput: ['mean_mode', 'knn', 'linear', 'logistic', 'svm', 'xgboost', 'ensemble']
 #       algorithm_supervised: ['Linear', 'XGBoost', 'LightGBM', 'Ensemble']
 
-proof_one_model = True
+proof_one_model = False
 if proof_one_model:
     rmse = ensemble_object.predict(filename=filename,
                                    sheet=sheet,
                                    list_columns=list_columns,
                                    target=target,
+                                   ids_test=[15, 23, 34, 52, 48, 44, 42, 21, 45, 60, 6, 5],
                                    algorithm_imput='knn',
                                    threshold_variance=0.05,
                                    threshold_importance=0.5,
@@ -63,6 +66,7 @@ else:
                                                    sheet=sheet,
                                                    list_columns=list_columns,
                                                    target=target,
+                                                   ids_test=[15, 23, 34, 52, 48, 44, 42, 21, 45, 60, 6, 5],
                                                    algorithm_imput=algorithm_imput,
                                                    threshold_variance=threshold_variance,
                                                    threshold_importance=threshold_importance,
