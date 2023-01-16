@@ -33,6 +33,8 @@ class SupervisedModel:
         return model_cv
 
     def xgboost_model(self, x_train, y_train):
+        x_train = x_train.reset_index(drop=True)
+        y_train = y_train.reset_index(drop=True)
         param_dist = {'n_estimators': stats.randint(80, 150),
                       'learning_rate': [0.001, 0.01, 0.1],
                       'subsample': stats.uniform(0.3, 0.7),
@@ -100,6 +102,8 @@ class SupervisedModel:
             model = self.linear_model(x_train_no_id, y_train)
             return [id_muestra_test, list(model.predict(x_test_no_id))]
         elif algorithm == 'XGBoost':
+            x_train_no_id = x_train_no_id.astype(float)
+            x_test_no_id = x_test_no_id.astype(float)
             model = self.xgboost_model(x_train_no_id, y_train)
             return [id_muestra_test, list(model.predict(x_test_no_id))]
         elif algorithm == 'LightGBM':
