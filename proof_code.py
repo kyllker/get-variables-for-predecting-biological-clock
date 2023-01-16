@@ -28,7 +28,7 @@ df = dfs[sheet]
 target = list(df['DNAmGrimAge'])[:60]
 
 print('Readed target')
-algorithms_imput = ['mean_mode', 'knn', 'linear', 'logistic', 'svm', 'xgboost', 'ensemble']
+algorithms_imput = ['mean_mode', 'knn', 'linear', 'svm', 'xgboost', 'ensemble']
 threshold_variances = [0.01, 0.05, 0.07]
 threshold_importances = [0.3, 0.5, 0.6]
 algorithms_supervised = ['Linear', 'XGBoost', 'LightGBM', 'Ensemble']
@@ -36,11 +36,11 @@ algorithms_supervised = ['Linear', 'XGBoost', 'LightGBM', 'Ensemble']
 seed = 42
 ensemble_object = Ensemble(seed)
 
-# Params predict ensemble: filename, sheet, list_columns, target, algorithm_imput,
+# Params predict ensemble: filename, sheet, list_columns, target, ids_test, algorithm_imput,
 #                          threshold_variance=0.05, threshold_importance=0.3, seed=42,
 #                          algorithm_supervised='Linear'
 # Possible values:
-#       algorithm_imput: ['mean_mode', 'knn', 'linear', 'logistic', 'svm', 'xgboost', 'ensemble']
+#       algorithm_imput: ['mean_mode', 'knn', 'linear', 'svm', 'xgboost', 'ensemble']
 #       algorithm_supervised: ['Linear', 'XGBoost', 'LightGBM', 'Ensemble']
 
 proof_one_model = False
@@ -50,11 +50,11 @@ if proof_one_model:
                                    list_columns=list_columns,
                                    target=target,
                                    ids_test=[15, 23, 34, 52, 48, 44, 42, 21, 45, 60, 6, 5],
-                                   algorithm_imput='knn',
-                                   threshold_variance=0.05,
-                                   threshold_importance=0.5,
+                                   algorithm_imput='mean_mode',
+                                   threshold_variance=0.01,
+                                   threshold_importance=0.3,
                                    seed=42,
-                                   algorithm_supervised='Linear'
+                                   algorithm_supervised='XGBoost'
                                    )
 else:
     min_rmse = 1000
@@ -62,6 +62,7 @@ else:
         for algorithm_imput in algorithms_imput:
             for threshold_variance in threshold_variances:
                 for threshold_importance in threshold_importances:
+                    print(algorithm_supervised + ' - ' + algorithm_imput + ' - ' + str(threshold_variance) + ' - ' + str(threshold_importance))
                     rmse = ensemble_object.predict(filename=filename,
                                                    sheet=sheet,
                                                    list_columns=list_columns,

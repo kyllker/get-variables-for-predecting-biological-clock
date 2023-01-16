@@ -4,7 +4,7 @@ import os
 import sys
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
-from sklearn import svm
+from sklearn import svm, preprocessing, utils
 from xgboost import XGBRegressor, XGBClassifier
 from sklearn.linear_model import SGDClassifier, LinearRegression, LogisticRegression
 
@@ -66,17 +66,6 @@ class Imputer:
         linear_model = LinearRegression()
         linear_model.fit(x_train, y_train)
         return linear_model.predict(x_predict)
-
-    @staticmethod
-    def logistic_regressor(x_train, y_train, x_predict):
-        logistic_model = LogisticRegression(C=1.0, class_weight=None, dual=False, fit_intercept=True,
-                                            intercept_scaling=1, l1_ratio=None, max_iter=100,
-                                            multi_class='auto', n_jobs=None, penalty='l2',
-                                            random_state=None, solver='lbfgs', tol=0.0001, verbose=0,
-                                            warm_start=False)
-
-        logistic_model.fit(x_train, y_train)
-        return logistic_model.predict(x_predict)
 
     @staticmethod
     def knn_classifier(x_train, y_train, x_predict):
@@ -143,8 +132,6 @@ class Imputer:
                         imput_res = self.knn_classifier(x_train, y_train, x_imput_na)
                     elif algorithm == 'linear':
                         imput_res = self.linear_classifier(x_train, y_train, x_imput_na)
-                    elif algorithm == 'logistic':
-                        imput_res = self.linear_classifier(x_train, y_train, x_imput_na)
                     elif algorithm == 'svm':
                         imput_res = self.svm_classifier(x_train, y_train, x_imput_na)
                     elif algorithm == 'xgboost':
@@ -160,8 +147,6 @@ class Imputer:
                         imput_res = self.knn_regressor(x_train, y_train, x_imput_na)
                     elif algorithm == 'linear':
                         imput_res = self.linear_regressor(x_train, y_train, x_imput_na)
-                    elif algorithm == 'logistic':
-                        imput_res = self.logistic_regressor(x_train, y_train, x_imput_na)
                     elif algorithm == 'svm':
                         imput_res = self.svm_regressor(x_train, y_train, x_imput_na)
                     elif algorithm == 'xgboost':
@@ -170,12 +155,10 @@ class Imputer:
                         mean_mode_res = self.mean_or_mode_regressor(x_train, y_train, x_imput_na)
                         knn_res = self.knn_regressor(x_train, y_train, x_imput_na)
                         linear_res = self.linear_regressor(x_train, y_train, x_imput_na)
-                        logistic_res = self.logistic_regressor(x_train, y_train, x_imput_na)
                         svm_res = self.svm_regressor(x_train, y_train, x_imput_na)
                         xgboost_res = self.xgboost_regressor(x_train, y_train, x_imput_na)
-                        [(g + h + j + k + l + m) / 6
-                         for g, h, j, k, l, m in zip(mean_mode_res, knn_res, linear_res,
-                                                     logistic_res, svm_res, xgboost_res)]
+                        imput_res = [(g + h + j + k + l) / 6
+                                     for g, h, j, k, l in zip(mean_mode_res, knn_res, linear_res, svm_res, xgboost_res)]
 
                 j = 0
                 for i in range(len(list_target)):
