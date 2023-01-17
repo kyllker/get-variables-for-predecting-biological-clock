@@ -34,6 +34,7 @@ class SupervisedModel:
 
     def xgboost_model(self, x_train, y_train):
         x_train = x_train.reset_index(drop=True)
+        x_train = x_train.astype(float)
         y_train = y_train.reset_index(drop=True)
         param_dist = {'n_estimators': stats.randint(80, 150),
                       'learning_rate': [0.001, 0.01, 0.1],
@@ -62,6 +63,9 @@ class SupervisedModel:
         return clf
 
     def lightgbm_model(self, x_train, y_train):
+        x_train = x_train.reset_index(drop=True)
+        y_train = y_train.reset_index(drop=True)
+        x_train = x_train.astype(float)
         param_dist = {
             'task': ['train'],
             'boosting': ['gbdt'],
@@ -107,6 +111,8 @@ class SupervisedModel:
             model = self.xgboost_model(x_train_no_id, y_train)
             return [id_muestra_test, list(model.predict(x_test_no_id))]
         elif algorithm == 'LightGBM':
+            x_train_no_id = x_train_no_id.astype(float)
+            x_test_no_id = x_test_no_id.astype(float)
             model = self.lightgbm_model(x_train_no_id, y_train)
             return [id_muestra_test, list(model.predict(x_test_no_id))]
         elif algorithm == 'Ensemble':

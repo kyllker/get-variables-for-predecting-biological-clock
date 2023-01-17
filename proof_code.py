@@ -17,7 +17,6 @@ sublist_1 = [i for i in range(61, 204)]
 sublist_2 = [i for i in range(2550, 2616)]
 list_columns.extend(sublist_1)
 list_columns.extend(sublist_2)
-print(list_columns)
 print('Desired columns done')
 
 
@@ -43,7 +42,7 @@ ensemble_object = Ensemble(seed)
 #       algorithm_imput: ['mean_mode', 'knn', 'linear', 'svm', 'xgboost', 'ensemble']
 #       algorithm_supervised: ['Linear', 'XGBoost', 'LightGBM', 'Ensemble']
 
-proof_one_model = False
+proof_one_model = True
 if proof_one_model:
     rmse = ensemble_object.predict(filename=filename,
                                    sheet=sheet,
@@ -54,7 +53,7 @@ if proof_one_model:
                                    threshold_variance=0.01,
                                    threshold_importance=0.3,
                                    seed=42,
-                                   algorithm_supervised='XGBoost'
+                                   algorithm_supervised='LightGBM'
                                    )
 else:
     min_rmse = 1000
