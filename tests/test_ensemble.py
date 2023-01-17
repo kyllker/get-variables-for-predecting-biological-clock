@@ -12,9 +12,7 @@ class TestEnsemble:
     def setup_class(self):
         self.seed = 42
         self.ensemble_object = Ensemble(self.seed)
-
         self.df = pd.DataFrame([[1, 1], [1, 2]], columns=['A', 'B'])
-
         self.df_no_numerical = pd.DataFrame([['a', 'b'], ['c', 'd']], columns=['A', 'B'])
 
     def test_build_an_ensemble_object(self):

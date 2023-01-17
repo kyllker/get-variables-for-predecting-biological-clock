@@ -11,7 +11,7 @@ sys.path.append(project_dir)
 from src.Preprocessors.imputer import Imputer
 
 
-class Testimputer:
+class TestImputer:
     def setup_class(self):
         self.seed = 42
         self.imputer_object = Imputer(self.seed)
@@ -37,31 +37,80 @@ class Testimputer:
         assert self.imputer_object.get_na_and_no_na_columns(self.df_na)[0][0] == 'B' and \
                self.imputer_object.get_na_and_no_na_columns(self.df_na)[1][0] == 'A'
 
-    def test_knn_classifier(self):
-        X_train = self.iris.data[:145]
-        y_train = self.iris.target[:145]
-        X_predict = self.iris.data[145:]
-        assert all(self.imputer_object.knn_classifier(X_train, y_train, X_predict) == [2, 2, 2, 2, 2])
-
-    def test_knn_regressor(self):
-        X_train = self.iris.data[:145]
-        y_train = self.iris.target[:145]
-        X_predict = self.iris.data[145:]
-        assert all(self.imputer_object.knn_regressor(X_train, y_train, X_predict) == [2.0,  1.6, 2.0,  2.0,  1.8])
-
     def test__imputer_normalize_dataframe(self):
         df2 = pd.DataFrame([[1, 1], [2, 3]], columns=['B', 'C'])
         dataframe_drop_constant_columns = self.imputer_object.normalize_dataframe(df2)
         df_res = pd.DataFrame([[0, 0], [1, 1]], columns=['B', 'C'])
         assert np.array_equal(dataframe_drop_constant_columns.to_numpy(), df_res.to_numpy())
 
+    def test_knn_classifier(self):
+        x_train = self.iris.data[:145]
+        y_train = self.iris.target[:145]
+        x_predict = self.iris.data[145:]
+        assert all(self.imputer_object.knn_classifier(x_train, y_train, x_predict) == [2, 2, 2, 2, 2])
+
+    def test_knn_regressor(self):
+        x_train = self.iris.data[:145]
+        y_train = self.iris.target[:145]
+        x_predict = self.iris.data[145:]
+        assert all(self.imputer_object.knn_regressor(x_train, y_train, x_predict) == [2.0,  1.6, 2.0,  2.0,  1.8])
+
+    def test_mean_or_mode_classifier(self):
+        x_train = pd.DataFrame(self.iris.data[:145])
+        y_train = list(self.iris.target[:145])
+        x_predict = pd.DataFrame(self.iris.data[145:])
+        assert set(self.imputer_object.mean_or_mode_classifier(x_train, y_train, x_predict)) == set([0, 0, 0, 0, 0])
+
+    def test_mean_or_mode_regressor(self):
+        x_train = pd.DataFrame(self.iris.data[:145])
+        y_train = list(self.iris.target[:145])
+        x_predict = pd.DataFrame(self.iris.data[145:])
+        assert set(self.imputer_object.mean_or_mode_regressor(x_train, y_train, x_predict)) == \
+               set([0.9655172413793104, 0.9655172413793104, 0.9655172413793104, 0.9655172413793104, 0.9655172413793104])
+
+    def test_linear_classifier(self):
+        x_train = pd.DataFrame(self.iris.data[:145])
+        y_train = list(self.iris.target[:145])
+        x_predict = pd.DataFrame(self.iris.data[145:])
+        assert set(self.imputer_object.linear_classifier(x_train, y_train, x_predict)) == set([2, 2, 2, 2, 2])
+
+    def test_linear_regressor(self):
+        x_train = pd.DataFrame(self.iris.data[:145])
+        y_train = list(self.iris.target[:145])
+        x_predict = pd.DataFrame(self.iris.data[145:])
+        assert 1.5 < max(self.imputer_object.linear_regressor(x_train, y_train, x_predict)) < 2
+
+    def test_svm_classifier(self):
+        x_train = pd.DataFrame(self.iris.data[:145])
+        y_train = list(self.iris.target[:145])
+        x_predict = pd.DataFrame(self.iris.data[145:])
+        assert set(self.imputer_object.svm_classifier(x_train, y_train, x_predict)) == set([2, 2, 2, 2, 2])
+
+    def test_svm_regressor(self):
+        x_train = pd.DataFrame(self.iris.data[:145])
+        y_train = list(self.iris.target[:145])
+        x_predict = pd.DataFrame(self.iris.data[145:])
+        assert 1.5 < max(self.imputer_object.linear_regressor(x_train, y_train, x_predict)) < 2
+
+    def test_xgboost_classifier(self):
+        x_train = pd.DataFrame(self.iris.data[:145])
+        y_train = list(self.iris.target[:145])
+        x_predict = pd.DataFrame(self.iris.data[145:])
+        assert set(self.imputer_object.xgboost_classifier(x_train, y_train, x_predict)) == set([2, 2, 2, 2, 2])
+
+    def test_xgboost_regressor(self):
+        x_train = pd.DataFrame(self.iris.data[:145])
+        y_train = list(self.iris.target[:145])
+        x_predict = pd.DataFrame(self.iris.data[145:])
+        assert 1.5 < max(self.imputer_object.linear_regressor(x_train, y_train, x_predict)) < 2
+
     def test_predict_with_knn_regressor(self):
-        X, y = load_iris(return_X_y=True)
-        mask = np.random.randint(0, 2, size=X.shape).astype(bool)
-        X[mask] = np.nan
-        df_iris = pd.DataFrame(data=np.c_[X, y], columns=self.iris['feature_names'] + ['target'])
+        x, y = load_iris(return_X_y=True)
+        mask = np.random.randint(0, 2, size=x.shape).astype(bool)
+        x[mask] = np.nan
+        df_iris = pd.DataFrame(data=np.c_[x, y], columns=self.iris['feature_names'] + ['target'])
         df_iris = df_iris.drop('target', axis=1)
         df_iris['sepal length (cm)'] = 1
         df_iris['petal length (cm)'] = 2
         df_iris_no_na = self.imputer_object.predict(df_iris, 'knn')
-        assert df_iris_no_na.isna().sum().sum() == 0 and 1 < df_iris_no_na.iloc[0,1] < 3.9
+        assert df_iris_no_na.isna().sum().sum() == 0 and 1 < df_iris_no_na.iloc[0, 1] < 3.9

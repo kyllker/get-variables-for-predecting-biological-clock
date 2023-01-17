@@ -64,10 +64,10 @@ class TestCleaner:
         assert np.array_equal(dataframe_drop_constant_columns.to_numpy(), df_res.to_numpy())
 
     def test__predict(self):
-        df = pd.DataFrame([['id1', 'a', 'b', 'w', 'a', 'f'], ['id2', 'c', 'd', 'w', 'c', 'd'], ['id3', 'a', 'j', 'w',
-                                                                                                'a', 'k']],
+        df = pd.DataFrame([['id1', 'a', 'b', 'w', 'a', 'f'], ['id2', 'c', 'd', 'w', 'c', 'd'],
+                           ['id3', 'a', 'j', 'w', 'a', 'k']],
                           columns=['ID_Muestra', 'A', 'B', 'C', 'D', 'E'])
         df_res = self.cleaner_object.predict(df, ['ID_Muestra', 'A', 'B', 'C', 'D'])
-        df_pred = pd.DataFrame([['id1', 0, 1, 0], ['id2', 1, 0, 0], ['id3', 0, 0, 1]], columns=['ID_Muestra', 'A',
-                                                                                                'B_b', 'B_j'])
+        df_pred = pd.DataFrame([['id1', 0, 1, 0], ['id2', 1, 0, 0], ['id3', 0, 0, 1]],
+                               columns=['ID_Muestra', 'A', 'B_b', 'B_j'])
         assert np.array_equal(df_res.to_numpy(), df_pred.to_numpy())
