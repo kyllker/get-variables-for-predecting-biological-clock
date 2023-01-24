@@ -56,7 +56,7 @@ Remove constants columns
 
 Imput na values with algorithms because there are a lot of variables but we have little cases, then we can use algorithms very quickly
 
-We have several algorithms and we can choose the best of ['mean_mode', 'knn', 'linear', 'logistic', 'svm', 'xgboost', 'ensemble']
+We have several algorithms, so we can choose the best of ['mean_mode', 'knn', 'linear', 'svm', 'xgboost', 'ensemble']
 
 ### FINAL STEPS
 
