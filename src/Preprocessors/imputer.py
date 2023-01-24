@@ -1,12 +1,12 @@
 import pandas as pd
 pd.options.mode.chained_assignment = None
-import os
-import sys
 import numpy as np
+import random
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
-from sklearn import svm, preprocessing, utils
+from sklearn import svm
 from xgboost import XGBRegressor, XGBClassifier
 from sklearn.linear_model import SGDClassifier, LinearRegression, LogisticRegression
+random.seed(42)
 
 
 class Imputer:

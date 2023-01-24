@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 import warnings
 warnings.filterwarnings('ignore')
+from warnings import simplefilter
+simplefilter("ignore", category=RuntimeWarning)
 from scipy import stats
 from sklearn.feature_selection import RFE
 from sklearn.linear_model import LinearRegression
@@ -44,7 +46,7 @@ class SupervisedModel:
                       'min_child_weight': [1, 3],
                       'seed': [self.seed]
                       }
-        clf_xgb = xgb.XGBRegressor(objective='reg:squarederror', verbosity=0)
+        clf_xgb = xgb.XGBRegressor(objective='reg:squarederror', verbosity=0, random_state=self.seed)
         clf = RandomizedSearchCV(clf_xgb, param_distributions=param_dist, n_iter=25, scoring='neg_mean_squared_error',
                                  error_score=0, verbose=0, n_jobs=-1, random_state=self.seed)
         num_folds = 10
@@ -68,18 +70,19 @@ class SupervisedModel:
         x_train = x_train.astype(float)
         param_dist = {
             'task': ['train'],
-            'boosting': ['gbdt'],
+            'boosting_type': ['gbdt'],
             'objective': ['regression'],
-            'num_leaves': [10, 50, 100],
+            'num_leaves': [2, 3, 5],
             'learning_rate': [0.001, 0.01, 0.1],
             'metric': ['l2', 'l1'],
-            'seed': [self.seed]
+            'seed': [self.seed],
+            'verbosity': [-1]
         }
-        clf_lgb = lgb.LGBMRegressor(verbosity=0)
+        clf_lgb = lgb.LGBMRegressor(verbosity=-1, silent=True, random_state=self.seed)
         clf = RandomizedSearchCV(estimator=clf_lgb,
                                  param_distributions=param_dist, cv=5,
                                  n_iter=100,
-                                 verbose=0,
+                                 verbose=-1,
                                  random_state=self.seed
                                  )
 
@@ -102,25 +105,25 @@ class SupervisedModel:
         x_train_no_id = x_train.drop('ID_Muestra', axis=1)
         id_muestra_test = list(x_test['ID_Muestra'])
         x_test_no_id = x_test.drop('ID_Muestra', axis=1)
+        x_train_no_id = x_train_no_id.astype(float)
+        x_test_no_id = x_test_no_id.astype(float)
+
         if algorithm == 'Linear':
             model = self.linear_model(x_train_no_id, y_train)
             return [id_muestra_test, list(model.predict(x_test_no_id))]
         elif algorithm == 'XGBoost':
-            x_train_no_id = x_train_no_id.astype(float)
-            x_test_no_id = x_test_no_id.astype(float)
             model = self.xgboost_model(x_train_no_id, y_train)
             return [id_muestra_test, list(model.predict(x_test_no_id))]
         elif algorithm == 'LightGBM':
-            x_train_no_id = x_train_no_id.astype(float)
-            x_test_no_id = x_test_no_id.astype(float)
             model = self.lightgbm_model(x_train_no_id, y_train)
             return [id_muestra_test, list(model.predict(x_test_no_id))]
         elif algorithm == 'Ensemble':
             model_linear = self.linear_model(x_train_no_id, y_train)
             model_xgboost = self.xgboost_model(x_train_no_id, y_train)
-            model_lightgbm = self.lightgbm_model(x_train_no_id, y_train)
+            # model_lightgbm = self.lightgbm_model(x_train_no_id, y_train)
             res_linear = model_linear.predict(x_test_no_id)
             res_xgboost = model_xgboost.predict(x_test_no_id)
-            res_lightgbm = model_lightgbm.predict(x_test_no_id)
-            predictions = [(g + h + j) / 3 for g, h, j in zip(res_linear, res_xgboost, res_lightgbm)]
-            return [id_muestra_test, predictions]
+            # res_lightgbm = model_lightgbm.predict(x_test_no_id)
+            # predictions = [(g + h + j) / 3 for g, h, j in zip(res_linear, res_xgboost, res_lightgbm)]
+            prediction_linear_xg = [(g + h) / 2 for g, h in zip(res_linear, res_xgboost)]
+            return [id_muestra_test, prediction_linear_xg]

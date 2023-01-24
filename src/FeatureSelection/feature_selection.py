@@ -56,7 +56,7 @@ class FeatureSelection:
             importance_features_sorted_all['feature'] = importance_features_sorted_all.index
         importance_features_sorted_all = importance_features_sorted_all.reset_index(drop=True)
         df_important_threshold = \
-            importance_features_sorted_all[importance_features_sorted_all['feature_importance'] > threshold_importance]
+            importance_features_sorted_all[importance_features_sorted_all['ranking'] < threshold_importance]
         selection_features = list(df_important_threshold.feature.unique())
 
         return dataframe.loc[:, selection_features]
