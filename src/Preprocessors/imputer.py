@@ -2,6 +2,8 @@ import pandas as pd
 pd.options.mode.chained_assignment = None
 import numpy as np
 import random
+import os
+import pickle
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn import svm
 from xgboost import XGBRegressor, XGBClassifier
@@ -36,75 +38,110 @@ class Imputer:
     @staticmethod
     def normalize_dataframe(dataframe):
         normalized_dataframe = dataframe.copy()
+        list_columns_normalized = []
         for index_column in range(normalized_dataframe.shape[1]):
             column_name = normalized_dataframe.columns[index_column]
             if normalized_dataframe[column_name].nunique() == 1:
                 normalized_dataframe.loc[:, column_name] = 1
+                list_columns_normalized.append((column_name, 1, 1))
             else:
-                normalized_dataframe.loc[:, column_name] = (normalized_dataframe[column_name] - normalized_dataframe[column_name].min()) / (
-                    normalized_dataframe[column_name].max() - normalized_dataframe[column_name].min())
+                normalized_dataframe.loc[:, column_name] = \
+                    (normalized_dataframe[column_name] - normalized_dataframe[column_name].min()) / \
+                    (normalized_dataframe[column_name].max() - normalized_dataframe[column_name].min())
+                list_columns_normalized.append((column_name, normalized_dataframe[column_name].min(),
+                                                (normalized_dataframe[column_name].max())))
+        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'normalize_columns_before_imput.pkl'), 'wb') as f:
+            pickle.dump(list_columns_normalized, f)
         return normalized_dataframe
 
     @staticmethod
-    def mean_or_mode_classifier(_, y_train, x_predict):
-        mode_list = max(set(y_train), key=y_train.count)
-        return [mode_list for _ in range(x_predict.shape[0])]
+    def mean_or_mode_classifier(_, y_train, x_predict, column_name):
+        mode_value = max(set(y_train), key=y_train.count)
+        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'mode_classifier_' + column_name + '.pkl'), 'wb') as f:
+            pickle.dump([column_name, mode_value], f)
+        return [mode_value for _ in range(x_predict.shape[0])]
 
     @staticmethod
-    def mean_or_mode_regressor(_, y_train, x_predict):
-        mean_list = sum(y_train) / len(y_train)
-        return [mean_list for _ in range(x_predict.shape[0])]
+    def mean_or_mode_regressor(_, y_train, x_predict, column_name):
+        mean_value = sum(y_train) / len(y_train)
+        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'mean_regressor_' + column_name + '.pkl'), 'wb') as f:
+            pickle.dump([column_name, mean_value], f)
+        return [mean_value for _ in range(x_predict.shape[0])]
 
     @staticmethod
-    def linear_classifier(x_train, y_train, x_predict):
+    def linear_classifier(x_train, y_train, x_predict, column_name):
         linear_model = SGDClassifier(max_iter=1000, tol=1e-3)
         linear_model.fit(x_train, y_train)
+        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'linear_classifier_' + column_name + '.pkl'), 'wb') as f:
+            pickle.dump([linear_model, x_train.columns.values.tolist()], f)
         return linear_model.predict(x_predict)
 
     @staticmethod
-    def linear_regressor(x_train, y_train, x_predict):
+    def linear_regressor(x_train, y_train, x_predict, column_name):
         linear_model = LinearRegression()
         linear_model.fit(x_train, y_train)
+        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'linear_regressor_' + column_name + '.pkl'), 'wb') as f:
+            pickle.dump([linear_model, x_train.columns.values.tolist()], f)
         return linear_model.predict(x_predict)
 
     @staticmethod
-    def knn_classifier(x_train, y_train, x_predict):
+    def knn_classifier(x_train, y_train, x_predict, column_name):
         knn = KNeighborsClassifier(n_neighbors=5)
         knn.fit(x_train, y_train)
+        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'knn_classifier_' + column_name + '.pkl'), 'wb') as f:
+            pickle.dump([knn, x_train.columns.values.tolist()], f)
         return knn.predict(x_predict)
 
     @staticmethod
-    def knn_regressor(x_train, y_train, x_predict):
+    def knn_regressor(x_train, y_train, x_predict, column_name):
         if len(y_train) < 5:
             y_res = [sum(y_train) / len(y_train) for _ in range(x_predict.shape[0])]
+            with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'knn_regressor_' + column_name + '.pkl'),
+                      'wb') as f:
+                pickle.dump([[column_name, sum(y_train) / len(y_train)], x_train.columns.values.tolist()], f)
         else:
             knn = KNeighborsRegressor(n_neighbors=5)
             knn.fit(x_train, y_train)
+            with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'knn_regressor_' + column_name + '.pkl'),
+                      'wb') as f:
+                pickle.dump([knn, x_train.columns.values.tolist()], f)
             y_res = knn.predict(x_predict)
         return y_res
 
     @staticmethod
-    def svm_classifier(x_train, y_train, x_predict):
+    def svm_classifier(x_train, y_train, x_predict, column_name):
         clf = svm.SVC(kernel='linear')
         clf.fit(x_train, y_train)
+        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'svm_classifier_' + column_name + '.pkl'),
+                  'wb') as f:
+            pickle.dump([clf, x_train.columns.values.tolist()], f)
         return clf.predict(x_predict)
 
     @staticmethod
-    def svm_regressor(x_train, y_train, x_predict):
+    def svm_regressor(x_train, y_train, x_predict, column_name):
         clf = svm.SVR(kernel='rbf')
         clf.fit(x_train, y_train)
+        with open(os.path.join(
+                'src', 'model_store', 'saved_models', 'imputer', 'svm_regressor_' + column_name + '.pkl'), 'wb') as f:
+            pickle.dump([clf, x_train.columns.values.tolist()], f)
         return clf.predict(x_predict)
 
-    def xgboost_classifier(self, x_train, y_train, x_predict):
+    def xgboost_classifier(self, x_train, y_train, x_predict, column_name):
         model = XGBClassifier(n_estimators=1000, max_depth=7, eta=0.1, subsample=0.7, colsample_bytree=0.8,
                               random_state=self.seed)
         model.fit(x_train, y_train)
+        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'xgboost_classifier_' + column_name + '.pkl'),
+                  'wb') as f:
+            pickle.dump([model, x_train.columns.values.tolist()], f)
         return model.predict(x_predict)
 
-    def xgboost_regressor(self, x_train, y_train, x_predict):
+    def xgboost_regressor(self, x_train, y_train, x_predict, column_name):
         model = XGBRegressor(n_estimators=1000, max_depth=7, eta=0.1, subsample=0.7, colsample_bytree=0.8,
                              random_state=self.seed)
         model.fit(x_train, y_train)
+        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'xgboost_regressor_' + column_name + '.pkl'),
+                  'wb') as f:
+            pickle.dump([model, x_train.columns.values.tolist()], f)
         return model.predict(x_predict)
 
     def predict(self, dataframe, algorithm):
@@ -118,6 +155,7 @@ class Imputer:
                 df_no_na_normalized = self.normalize_dataframe(df_no_na)
                 list_target = list(dataframe[column_na])
                 list_target_not_none = [np.nan if v is None else v for v in list_target]
+                list_target_not_none = [np.nan if v == 'nan' else v for v in list_target_not_none]
                 index_na_values = [i for i, x in enumerate(list_target) if pd.isnull(x)]
                 index_no_na_values = list(set([i for i in range(len(list_target))]) - set(index_na_values))
                 x_train = df_no_na_normalized.iloc[index_no_na_values, :]
@@ -127,37 +165,37 @@ class Imputer:
                 if any([True if isinstance(v, str) else False for v in list_target_not_none]):
                     # Use classifier algorithm
                     if algorithm == 'mean_mode':
-                        imput_res = self.mean_or_mode_classifier(x_train, y_train, x_imput_na)
+                        imput_res = self.mean_or_mode_classifier(x_train, y_train, x_imput_na, column_na)
                     elif algorithm == 'knn':
-                        imput_res = self.knn_classifier(x_train, y_train, x_imput_na)
+                        imput_res = self.knn_classifier(x_train, y_train, x_imput_na, column_na)
                     elif algorithm == 'linear':
-                        imput_res = self.linear_classifier(x_train, y_train, x_imput_na)
+                        imput_res = self.linear_classifier(x_train, y_train, x_imput_na, column_na)
                     elif algorithm == 'svm':
-                        imput_res = self.svm_classifier(x_train, y_train, x_imput_na)
+                        imput_res = self.svm_classifier(x_train, y_train, x_imput_na, column_na)
                     elif algorithm == 'xgboost':
-                        imput_res = self.xgboost_classifier(x_train, y_train, x_imput_na)
+                        imput_res = self.xgboost_classifier(x_train, y_train, x_imput_na, column_na)
                     elif algorithm == 'ensemble':
-                        imput_res = self.knn_classifier(x_train, y_train, x_imput_na)
+                        imput_res = self.knn_classifier(x_train, y_train, x_imput_na, column_na)
 
                 else:
                     # Use regressor algorithm
                     if algorithm == 'mean_mode':
-                        imput_res = self.mean_or_mode_regressor(x_train, y_train, x_imput_na)
+                        imput_res = self.mean_or_mode_regressor(x_train, y_train, x_imput_na, column_na)
                     elif algorithm == 'knn':
-                        imput_res = self.knn_regressor(x_train, y_train, x_imput_na)
+                        imput_res = self.knn_regressor(x_train, y_train, x_imput_na, column_na)
                     elif algorithm == 'linear':
-                        imput_res = self.linear_regressor(x_train, y_train, x_imput_na)
+                        imput_res = self.linear_regressor(x_train, y_train, x_imput_na, column_na)
                     elif algorithm == 'svm':
-                        imput_res = self.svm_regressor(x_train, y_train, x_imput_na)
+                        imput_res = self.svm_regressor(x_train, y_train, x_imput_na, column_na)
                     elif algorithm == 'xgboost':
-                        imput_res = self.xgboost_regressor(x_train, y_train, x_imput_na)
+                        imput_res = self.xgboost_regressor(x_train, y_train, x_imput_na, column_na)
                     elif algorithm == 'ensemble':
-                        mean_mode_res = self.mean_or_mode_regressor(x_train, y_train, x_imput_na)
-                        knn_res = self.knn_regressor(x_train, y_train, x_imput_na)
-                        linear_res = self.linear_regressor(x_train, y_train, x_imput_na)
-                        svm_res = self.svm_regressor(x_train, y_train, x_imput_na)
-                        xgboost_res = self.xgboost_regressor(x_train, y_train, x_imput_na)
-                        imput_res = [(g + h + j + k + l) / 6
+                        mean_mode_res = self.mean_or_mode_regressor(x_train, y_train, x_imput_na, column_na)
+                        knn_res = self.knn_regressor(x_train, y_train, x_imput_na, column_na)
+                        linear_res = self.linear_regressor(x_train, y_train, x_imput_na, column_na)
+                        svm_res = self.svm_regressor(x_train, y_train, x_imput_na, column_na)
+                        xgboost_res = self.xgboost_regressor(x_train, y_train, x_imput_na, column_na)
+                        imput_res = [(g + h + j + k + l) / 5
                                      for g, h, j, k, l in zip(mean_mode_res, knn_res, linear_res, svm_res, xgboost_res)]
 
                 j = 0

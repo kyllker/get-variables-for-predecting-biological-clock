@@ -1,6 +1,5 @@
+import pickle
 import os
-import sys
-import re
 import numpy as np
 import pandas as pd
 pd.options.mode.chained_assignment = None
@@ -10,8 +9,6 @@ from sklearn.feature_selection import VarianceThreshold
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
-project_dir = os.path.join(os.path.dirname(__file__), '..', 'detect_fitbit_features')
-sys.path.append(project_dir)
 
 
 class FeatureSelection:
@@ -67,6 +64,9 @@ class FeatureSelection:
         dataframe_big_variance = self.drop_columns_little_variance(dataframe_no_id, threshold_variance)
         dataframe_ml_selection = \
             self.feature_selection_with_ml_algorithms(dataframe_big_variance, target, threshold_importance)
-
+        with open(os.path.join('src', 'model_store', 'saved_models', 'feature_selection',
+                               'columns_selected_' + str(threshold_variance).replace('.', '') + '_'
+                               + str(threshold_importance).replace('.', '') + '.pkl'), 'wb') as f:
+            pickle.dump(dataframe_ml_selection.columns.values.tolist(), f)
         cleaned_dataframe = pd.concat([id_muestra, dataframe_ml_selection], 1)
         return cleaned_dataframe

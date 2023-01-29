@@ -5,3 +5,4 @@ xgboost==1.7.1
 seaborn==0.12.2
 matplotlib==3.6.2
 lightgbm==3.3.4
+zipfile36==0.1.3
