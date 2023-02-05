@@ -33,26 +33,10 @@ class Imputer:
         column_numeric = df_no_na.columns[list(map(pd.api.types.is_numeric_dtype, df_no_na.dtypes))]
         df_no_na_numeric = df_no_na[column_numeric]
         list_no_na_columns_numeric = list(df_no_na_numeric.columns)
+        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'order_columns_imputer.pkl'),
+                  'wb') as f:
+            pickle.dump(list_na_columns, f)
         return [list_na_columns, list_no_na_columns_numeric]
-
-    @staticmethod
-    def normalize_dataframe(dataframe):
-        normalized_dataframe = dataframe.copy()
-        list_columns_normalized = []
-        for index_column in range(normalized_dataframe.shape[1]):
-            column_name = normalized_dataframe.columns[index_column]
-            if normalized_dataframe[column_name].nunique() == 1:
-                normalized_dataframe.loc[:, column_name] = 1
-                list_columns_normalized.append((column_name, 1, 1))
-            else:
-                normalized_dataframe.loc[:, column_name] = \
-                    (normalized_dataframe[column_name] - normalized_dataframe[column_name].min()) / \
-                    (normalized_dataframe[column_name].max() - normalized_dataframe[column_name].min())
-                list_columns_normalized.append((column_name, normalized_dataframe[column_name].min(),
-                                                (normalized_dataframe[column_name].max())))
-        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'normalize_columns_before_imput.pkl'), 'wb') as f:
-            pickle.dump(list_columns_normalized, f)
-        return normalized_dataframe
 
     @staticmethod
     def mean_or_mode_classifier(_, y_train, x_predict, column_name):
@@ -149,17 +133,17 @@ class Imputer:
             return dataframe
         else:
             list_na_columns = self.get_na_and_no_na_columns(dataframe)[0]
+
             for column_na in list_na_columns:
                 list_no_na_columns = self.get_na_and_no_na_columns(dataframe)[1]
                 df_no_na = dataframe[list_no_na_columns]
-                df_no_na_normalized = self.normalize_dataframe(df_no_na)
                 list_target = list(dataframe[column_na])
                 list_target_not_none = [np.nan if v is None else v for v in list_target]
                 list_target_not_none = [np.nan if v == 'nan' else v for v in list_target_not_none]
                 index_na_values = [i for i, x in enumerate(list_target) if pd.isnull(x)]
                 index_no_na_values = list(set([i for i in range(len(list_target))]) - set(index_na_values))
-                x_train = df_no_na_normalized.iloc[index_no_na_values, :]
-                x_imput_na = df_no_na_normalized.iloc[index_na_values, :]
+                x_train = df_no_na.iloc[index_no_na_values, :]
+                x_imput_na = df_no_na.iloc[index_na_values, :]
                 y_train = [list_target_not_none[i] for i in index_no_na_values]
 
                 if any([True if isinstance(v, str) else False for v in list_target_not_none]):
