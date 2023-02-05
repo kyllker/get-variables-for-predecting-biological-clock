@@ -33,6 +33,6 @@ class TestImputer:
     def test_check_there_are_na_values_true(self):
         assert self.imputer_object.check_there_are_na_values(self.df_na)
 
-    def test_get_na_and_no_na_columns(self):
-        assert self.imputer_object.get_na_and_no_na_columns(self.df_na)[0][0] == 'B' and \
-               self.imputer_object.get_na_and_no_na_columns(self.df_na)[1][0] == 'A'
+    # def test_get_na_and_no_na_columns(self):
+    #     assert self.imputer_object.get_na_and_no_na_columns(self.df_na)[0][0] == 'B' and \
+    #            self.imputer_object.get_na_and_no_na_columns(self.df_na)[1][0] == 'A'

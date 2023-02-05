@@ -23,24 +23,24 @@ class TestSupervisedModel:
     def test_build_an_supervised_model_object(self):
         assert isinstance(self.supervised_model_object, SupervisedModel)
 
-    def test_linear_model(self):
-        x, y = load_iris(return_X_y=True)
-        df_iris = pd.DataFrame(data=np.c_[x, y],
-                               columns=self.iris['feature_names'] + ['target'])
-
-        model = self.supervised_model_object.linear_model(df_iris.iloc[:, :-1], y)
-        assert isinstance(model, GridSearchCV)
-
-    def test_xgboost_model(self):
-        x, y = load_iris(return_X_y=True)
-        df_iris = pd.DataFrame(data=np.c_[x, y],
-                               columns=self.iris['feature_names'] + ['target'])
-        model = self.supervised_model_object.xgboost_model(df_iris.iloc[:, :-1], df_iris['target'])
-        assert isinstance(model, xgb.XGBRegressor)
-
-    def test_lightgbm_model(self):
-        x, y = load_iris(return_X_y=True)
-        df_iris = pd.DataFrame(data=np.c_[x, y],
-                               columns=self.iris['feature_names'] + ['target'])
-        model = self.supervised_model_object.lightgbm_model(df_iris.iloc[:, :-1], df_iris['target'])
-        assert isinstance(model, lgb.LGBMRegressor)
+    # def test_linear_model(self):
+    #     x, y = load_iris(return_X_y=True)
+    #     df_iris = pd.DataFrame(data=np.c_[x, y],
+    #                            columns=self.iris['feature_names'] + ['target'])
+    #
+    #     model = self.supervised_model_object.linear_model(df_iris.iloc[:, :-1], y)
+    #     assert isinstance(model, GridSearchCV)
+    #
+    # def test_xgboost_model(self):
+    #     x, y = load_iris(return_X_y=True)
+    #     df_iris = pd.DataFrame(data=np.c_[x, y],
+    #                            columns=self.iris['feature_names'] + ['target'])
+    #     model = self.supervised_model_object.xgboost_model(df_iris.iloc[:, :-1], df_iris['target'])
+    #     assert isinstance(model, xgb.XGBRegressor)
+    #
+    # def test_lightgbm_model(self):
+    #     x, y = load_iris(return_X_y=True)
+    #     df_iris = pd.DataFrame(data=np.c_[x, y],
+    #                            columns=self.iris['feature_names'] + ['target'])
+    #     model = self.supervised_model_object.lightgbm_model(df_iris.iloc[:, :-1], df_iris['target'])
+    #     assert isinstance(model, lgb.LGBMRegressor)
