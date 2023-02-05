@@ -1,9 +1,8 @@
 import numpy as np
 import pandas as pd
+import os
 import warnings
-warnings.filterwarnings('ignore')
 from warnings import simplefilter
-simplefilter("ignore", category=RuntimeWarning)
 from scipy import stats
 from sklearn.feature_selection import RFE
 from sklearn.linear_model import LinearRegression
@@ -11,6 +10,9 @@ from sklearn.model_selection import cross_val_score, KFold, GridSearchCV, Random
 from sklearn.metrics import mean_squared_error
 import xgboost as xgb
 import lightgbm as lgb
+import pickle
+simplefilter("ignore", category=RuntimeWarning)
+warnings.filterwarnings('ignore')
 
 
 class SupervisedModel:
@@ -32,6 +34,9 @@ class SupervisedModel:
                                 return_train_score=True
                                 )
         model_cv.fit(x_train, y_train)
+        with open(os.path.join('src', 'model_store', 'saved_models', 'supervised_models', 'Linear_model.pkl'),
+                  'wb') as f:
+            pickle.dump(model_cv, f)
         return model_cv
 
     def xgboost_model(self, x_train, y_train):
@@ -62,6 +67,9 @@ class SupervisedModel:
                 best_estimator[0] = clf.best_estimator_
         clf = best_estimator[0]
         clf.fit(x_train, list(y_train))
+        with open(os.path.join('src', 'model_store', 'saved_models', 'supervised_models', 'XGBoost_model.pkl'),
+                  'wb') as f:
+            pickle.dump(clf, f)
         return clf
 
     def lightgbm_model(self, x_train, y_train):
@@ -99,6 +107,9 @@ class SupervisedModel:
                 best_estimator[0] = clf.best_estimator_
         clf = best_estimator[0]
         clf.fit(x_train, list(y_train))
+        with open(os.path.join('src', 'model_store', 'saved_models', 'supervised_models', 'LightGBM_model.pkl'),
+                  'wb') as f:
+            pickle.dump(clf, f)
         return clf
 
     def predict(self, x_train, y_train, x_test, seed, algorithm='Linear'):

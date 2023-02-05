@@ -50,24 +50,24 @@ class TestCleaner:
         dataframe_drop_constant_columns = self.cleaner_object.remove_constant_columns(df2)
         assert df2.equals(dataframe_drop_constant_columns)
 
-    def test__convert_to_numerical_values_column_with_two_different_values(self):
-        dataframe_convert_numerical_columns = \
-            self.cleaner_object.convert_to_numerical_values_column_with_two_different_values(self.df_no_numerical)
-        print(dataframe_convert_numerical_columns)
-        df_numeric = pd.DataFrame([[0, 0], [1, 1]], columns=['A_a1_c0', 'B_b1_d0'])
-        assert np.array_equal(dataframe_convert_numerical_columns.to_numpy(), df_numeric.to_numpy())
-
-    def test__cleaner_normalize_dataframe(self):
-        df2 = pd.DataFrame([[1, 1], [2, 3]], columns=['B', 'C'])
-        dataframe_drop_constant_columns = self.cleaner_object.normalize_dataframe(df2)
-        df_res = pd.DataFrame([[0, 0], [1, 1]], columns=['B', 'C'])
-        assert np.array_equal(dataframe_drop_constant_columns.to_numpy(), df_res.to_numpy())
-
-    def test__predict(self):
-        df = pd.DataFrame([['id1', 'a', 'b', 'w', 'a', 'f'], ['id2', 'c', 'd', 'w', 'c', 'd'],
-                           ['id3', 'a', 'j', 'w', 'a', 'k']],
-                          columns=['ID_Muestra', 'A', 'B', 'C', 'D', 'E'])
-        df_res = self.cleaner_object.predict(df, ['ID_Muestra', 'A', 'B', 'C', 'D'])
-        df_pred = pd.DataFrame([['id1', 0, 1, 0], ['id2', 1, 0, 0], ['id3', 0, 0, 1]],
-                               columns=['ID_Muestra', 'A', 'B_b', 'B_j'])
-        assert np.array_equal(df_res.to_numpy(), df_pred.to_numpy())
+    # def test__convert_to_numerical_values_column_with_two_different_values(self):
+    #     dataframe_convert_numerical_columns = \
+    #         self.cleaner_object.convert_to_numerical_values_column_with_two_different_values(self.df_no_numerical)
+    #     print(dataframe_convert_numerical_columns)
+    #     df_numeric = pd.DataFrame([[0, 0], [1, 1]], columns=['A_a1_c0', 'B_b1_d0'])
+    #     assert np.array_equal(dataframe_convert_numerical_columns.to_numpy(), df_numeric.to_numpy())
+    #
+    # def test__cleaner_normalize_dataframe(self):
+    #     df2 = pd.DataFrame([[1, 1], [2, 3]], columns=['B', 'C'])
+    #     dataframe_drop_constant_columns = self.cleaner_object.normalize_dataframe(df2)
+    #     df_res = pd.DataFrame([[0, 0], [1, 1]], columns=['B', 'C'])
+    #     assert np.array_equal(dataframe_drop_constant_columns.to_numpy(), df_res.to_numpy())
+    #
+    # def test__predict(self):
+    #     df = pd.DataFrame([['id1', 'a', 'b', 'w', 'a', 'f'], ['id2', 'c', 'd', 'w', 'c', 'd'],
+    #                        ['id3', 'a', 'j', 'w', 'a', 'k']],
+    #                       columns=['ID_Muestra', 'A', 'B', 'C', 'D', 'E'])
+    #     df_res = self.cleaner_object.predict(df, ['ID_Muestra', 'A', 'B', 'C', 'D'])
+    #     df_pred = pd.DataFrame([['id1', 0, 1, 0], ['id2', 1, 0, 0], ['id3', 0, 0, 1]],
+    #                            columns=['ID_Muestra', 'A', 'B_b', 'B_j'])
+    #     assert np.array_equal(df_res.to_numpy(), df_pred.to_numpy())

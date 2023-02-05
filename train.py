@@ -1,15 +1,13 @@
 import pandas as pd
 import os
-import sys
-import math
-from sklearn.metrics import mean_squared_error
+import pickle
 import warnings
-warnings.filterwarnings('ignore')
 from warnings import simplefilter
-simplefilter("ignore", category=RuntimeWarning)
-project_dir = os.path.join(os.path.dirname(__file__), '..')
-sys.path.append(project_dir)
 from src.Ensemble.ensemble import Ensemble
+import shutil
+
+warnings.filterwarnings('ignore')
+simplefilter("ignore", category=RuntimeWarning)
 
 filename = 'Dataset_Masterfile.xlsx'
 sheet = '1_Var_CatYNum'
@@ -21,9 +19,7 @@ list_columns.extend(sublist_1)
 list_columns.extend(sublist_2)
 print('Desired columns done')
 
-
 xl_file = pd.ExcelFile(os.path.join('Data', filename))
-
 dfs = {sheet_name: xl_file.parse(sheet_name) for sheet_name in xl_file.sheet_names}
 df = dfs[sheet]
 target = list(df['DNAmGrimAge'])[:60]
@@ -55,14 +51,18 @@ if proof_one_model:
                                    list_columns=list_columns,
                                    target=target,
                                    ids_test=[15, 23, 34, 52, 48, 44, 42, 21, 45, 60, 6, 5],
-                                   algorithm_imput='xgboost',
+                                   algorithm_imput='svm',
                                    threshold_variance=0.01,
-                                   threshold_importance=50,
+                                   threshold_importance=30,
                                    seed=42,
                                    algorithm_supervised='Linear',
                                    activated_pca=True,
                                    n_components_pca=10
                                    )
+
+    shutil.make_archive(
+        os.path.join('src', 'model_store', 'compressed_model', 'best_model'),
+        'zip', os.path.join('src', 'model_store', 'saved_models'))
 else:
     min_rmse = 1000
     for act_pca in [True, False]:
@@ -100,6 +100,11 @@ else:
                                     'activated_pca': act_pca,
                                     'n_components_pca': ncom
                                 }
+                                with open(os.path.join('src', 'model_store', 'best_parameters.pkl'), 'wb') as f:
+                                    pickle.dump(best_parameters, f)
+                                shutil.make_archive(
+                                    os.path.join('src', 'model_store', 'compressed_model', 'best_model'),
+                                    'zip', os.path.join('src', 'model_store', 'saved_models'))
                             print(best_parameters)
             # Launch the best
     print(best_parameters)

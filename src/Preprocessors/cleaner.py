@@ -1,12 +1,10 @@
 import pandas as pd
-pd.options.mode.chained_assignment = None
-import os
-import sys
 import numbers
-import numpy as np
-project_dir = os.path.join(os.path.dirname(__file__), '..', 'detect_fitbit_features')
-sys.path.append(project_dir)
+import pickle
+import os
 from src.Preprocessors.imputer import Imputer
+
+pd.options.mode.chained_assignment = None
 
 
 class Cleaner:
@@ -35,6 +33,7 @@ class Cleaner:
     @staticmethod
     def convert_to_numerical_values_column_with_two_different_values(dataframe):
         df_aux = dataframe.copy()
+        columns_two_different_values = []
         for index_column in range(df_aux.shape[1]):
             column_name = df_aux.columns[index_column]
             list_unique_values = dataframe[column_name].unique()
@@ -46,14 +45,23 @@ class Cleaner:
                     dataframe = pd.concat([dataframe, new_column], 1)
                     if list_unique_values[0] == list_unique_values[0]:
                         dataframe.loc[dataframe[new_column_name] == list_unique_values[0], new_column_name] = 0
+                        columns_two_different_values.append((new_column_name, list_unique_values[0], 0))
                     else:
                         dataframe.loc[dataframe[new_column_name].isna(), new_column_name] = 0
+                        columns_two_different_values.append((new_column_name, "nan", 0))
                     if list_unique_values[1] == list_unique_values[1]:
                         dataframe.loc[dataframe[new_column_name] == list_unique_values[1], new_column_name] = 1
+                        columns_two_different_values.append((new_column_name, list_unique_values[0], 1))
                     else:
+                        columns_two_different_values.append((new_column_name, "nan", 1))
                         dataframe.loc[dataframe[new_column_name].isna(), new_column_name] = 1
 
                     dataframe = dataframe.drop(columns=[column_name])
+        if len(columns_two_different_values) > 0:
+            with open(
+                os.path.join('src', 'model_store', 'saved_models', 'cleaner', 'columns_two_different_values.pkl'),
+                    'wb') as f:
+                pickle.dump(columns_two_different_values, f)
         return dataframe
 
     @staticmethod
@@ -67,7 +75,13 @@ class Cleaner:
                 if not all([isinstance(i, numbers.Number) for i in list(dataframe.iloc[:, index_column])]):
                     list_columns_non_numerical_values.append(index_column)
         for index_column in list_columns_non_numerical_values:
-            list_unique_values = dataframe[dataframe.columns[index_column]].unique()
+            list_unique_values = list(dataframe[dataframe.columns[index_column]].unique())
+            list_column_dummy = [dataframe.columns[index_column], list_unique_values]
+            with open(
+                    os.path.join('src', 'model_store', 'saved_models', 'cleaner', 'dummies',
+                                 'dummy_column_' + dataframe.columns[index_column] + '.pkl'),
+                    'wb') as f:
+                pickle.dump(list_column_dummy, f)
             if 2 < len(list_unique_values) <= 5:
                 column_name = dataframe.columns[index_column]
                 for value in list_unique_values:
@@ -96,15 +110,22 @@ class Cleaner:
 
     @staticmethod
     def normalize_dataframe(dataframe):
+        list_columns_normalized = []
         normalized_dataframe = dataframe.copy()
         for index_column in range(normalized_dataframe.shape[1]):
             column_name = normalized_dataframe.columns[index_column]
             if normalized_dataframe[column_name].nunique() == 1:
                 normalized_dataframe.loc[:, column_name] = 1
+                list_columns_normalized.append((column_name, 1, 1))
             else:
+                list_columns_normalized.append((column_name, normalized_dataframe[column_name].min(),
+                                                (normalized_dataframe[column_name].max())))
                 normalized_dataframe.loc[:, column_name] = \
                     (normalized_dataframe[column_name] - normalized_dataframe[column_name].min()) / \
                     (normalized_dataframe[column_name].max() - normalized_dataframe[column_name].min())
+        with open(os.path.join('src', 'model_store', 'saved_models', 'cleaner', 'normalize_columns.pkl'),
+                  'wb') as f:
+            pickle.dump(list_columns_normalized, f)
         return normalized_dataframe
 
     def predict(self, dataframe, list_columns_with_order, algorithm='knn'):
@@ -113,14 +134,15 @@ class Cleaner:
         dataframe_desired_columns = self.filter_desired_columns(dataframe_no_id, list_columns_with_order)
         dataframe_numerical_values = \
             self.convert_to_numerical_values_column_with_two_different_values(dataframe_desired_columns)
-        dataframe_no_na = self.imputer.predict(dataframe_numerical_values, algorithm)
-        dataframe_numerical_values = \
-            self.convert_to_numerical_values_column_with_two_different_values(dataframe_no_na)
+
         dataframe_only_numerical_values = \
             self.convert_to_numerical_values_column_with_more_than_two_different_values(dataframe_numerical_values)
         dataframe_remove_duplicate_columns = self.remove_duplicate_columns(dataframe_only_numerical_values)
         dataframe_remove_constant_columns = self.remove_constant_columns(dataframe_remove_duplicate_columns)
 
         dataframe_normalized = self.normalize_dataframe(dataframe_remove_constant_columns)
-        cleaned_dataframe = pd.concat([id_muestra, dataframe_normalized], 1)
+
+        dataframe_no_na = self.imputer.predict(dataframe_normalized, algorithm)
+
+        cleaned_dataframe = pd.concat([id_muestra, dataframe_no_na], 1)
         return cleaned_dataframe
