@@ -46,19 +46,35 @@ ensemble_object = Ensemble(seed)
 
 proof_one_model = True
 if proof_one_model:
+    algorithm_imput = 'svm'
+    threshold_variance = 0.01
+    threshold_importance = 30
+    algorithm_supervised = 'Linear'
+    act_pca = True
+    ncom = 10
     rmse = ensemble_object.predict(filename=filename,
                                    sheet=sheet,
                                    list_columns=list_columns,
                                    target=target,
                                    ids_test=[15, 23, 34, 52, 48, 44, 42, 21, 45, 60, 6, 5],
-                                   algorithm_imput='svm',
-                                   threshold_variance=0.01,
-                                   threshold_importance=30,
+                                   algorithm_imput=algorithm_imput,
+                                   threshold_variance=threshold_variance,
+                                   threshold_importance=threshold_importance,
                                    seed=42,
-                                   algorithm_supervised='Linear',
-                                   activated_pca=True,
-                                   n_components_pca=10
+                                   algorithm_supervised=algorithm_supervised,
+                                   activated_pca=act_pca,
+                                   n_components_pca=ncom
                                    )
+    best_parameters = {
+        'algorithm_imput': algorithm_imput,
+        'threshold_variance': threshold_variance,
+        'threshold_importance': threshold_importance,
+        'algorithm_supervised': algorithm_supervised,
+        'activated_pca': act_pca,
+        'n_components_pca': ncom
+    }
+    with open(os.path.join('src', 'model_store', 'saved_models', 'best_parameters.pkl'), 'wb') as f:
+        pickle.dump(best_parameters, f)
 
     shutil.make_archive(
         os.path.join('src', 'model_store', 'compressed_model', 'best_model'),

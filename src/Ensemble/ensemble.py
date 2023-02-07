@@ -59,7 +59,6 @@ class Ensemble:
         print('Initial dataframe')
         print(df.shape)
         df_cleaned = self.cleaner_object.predict(df, list_columns, algorithm_imput)
-        print(df_cleaned.loc[df_cleaned['ID_Muestra'] == 15, 'A0A0G2JPR0'])
         print('Cleaned dataframe')
         print(df_cleaned.shape)
         df_feature_selection = self.feature_selection_object.predict(

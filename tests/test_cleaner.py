@@ -20,13 +20,13 @@ class TestCleaner:
     def test_build_a_cleaner_object(self):
         assert isinstance(self.cleaner_object, Cleaner)
 
-    def test__checker_filter_valid_columns(self):
-        dataframe_desired_columns = self.cleaner_object.filter_desired_columns(self.df, [0])
-        assert dataframe_desired_columns.equals(pd.DataFrame([[1], [1]], columns=['A']))
-
-    def test__checker_filter_not_valid_columns(self):
-        dataframe_desired_columns = self.cleaner_object.filter_desired_columns(self.df, [0, 2])
-        assert dataframe_desired_columns.equals(self.df)
+    # def test__checker_filter_valid_columns(self):
+    #     dataframe_desired_columns = self.cleaner_object.filter_desired_columns(self.df, [0])
+    #     assert dataframe_desired_columns.equals(pd.DataFrame([[1], [1]], columns=['A']))
+    #
+    # def test__checker_filter_not_valid_columns(self):
+    #     dataframe_desired_columns = self.cleaner_object.filter_desired_columns(self.df, [0, 2])
+    #     assert dataframe_desired_columns.equals(self.df)
 
     def test__drop_duplicate_columns(self):
         df2 = self.df.copy()

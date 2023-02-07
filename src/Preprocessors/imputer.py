@@ -24,7 +24,17 @@ class Imputer:
             return False
 
     @staticmethod
-    def get_na_and_no_na_columns(dataframe):
+    def get_na_columns(dataframe):
+        dataframe_sum_na = dataframe.isna().sum()
+        dataframe_nas_by_column = dataframe_sum_na.loc[lambda x: x > 0]
+        list_na_columns = list(dataframe_nas_by_column.sort_values(ascending=True).index)
+        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'order_columns_imputer.pkl'),
+                  'wb') as f:
+            pickle.dump(list_na_columns, f)
+        return list_na_columns
+
+    @staticmethod
+    def get_no_na_columns(dataframe):
         dataframe_sum_na = dataframe.isna().sum()
         dataframe_nas_by_column = dataframe_sum_na.loc[lambda x: x > 0]
         list_na_columns = list(dataframe_nas_by_column.sort_values(ascending=True).index)
@@ -33,13 +43,11 @@ class Imputer:
         column_numeric = df_no_na.columns[list(map(pd.api.types.is_numeric_dtype, df_no_na.dtypes))]
         df_no_na_numeric = df_no_na[column_numeric]
         list_no_na_columns_numeric = list(df_no_na_numeric.columns)
-        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'order_columns_imputer.pkl'),
-                  'wb') as f:
-            pickle.dump(list_na_columns, f)
-        return [list_na_columns, list_no_na_columns_numeric]
+        return list_no_na_columns_numeric
 
     @staticmethod
     def mean_or_mode_classifier(_, y_train, x_predict, column_name):
+        y_train = [x for x in y_train if str(x) != 'nan']
         mode_value = max(set(y_train), key=y_train.count)
         with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'mode_classifier_' + column_name + '.pkl'), 'wb') as f:
             pickle.dump([column_name, mode_value], f)
@@ -47,6 +55,7 @@ class Imputer:
 
     @staticmethod
     def mean_or_mode_regressor(_, y_train, x_predict, column_name):
+        y_train = [x for x in y_train if str(x) != 'nan']
         mean_value = sum(y_train) / len(y_train)
         with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'mean_regressor_' + column_name + '.pkl'), 'wb') as f:
             pickle.dump([column_name, mean_value], f)
@@ -129,13 +138,15 @@ class Imputer:
         return model.predict(x_predict)
 
     def predict(self, dataframe, algorithm):
+        for col in dataframe.columns:
+            _ = self.mean_or_mode_regressor(dataframe, dataframe[col], dataframe, col)
         if not self.check_there_are_na_values(dataframe):
             return dataframe
         else:
-            list_na_columns = self.get_na_and_no_na_columns(dataframe)[0]
+            list_na_columns = self.get_na_columns(dataframe)
 
             for column_na in list_na_columns:
-                list_no_na_columns = self.get_na_and_no_na_columns(dataframe)[1]
+                list_no_na_columns = self.get_no_na_columns(dataframe)
                 df_no_na = dataframe[list_no_na_columns]
                 list_target = list(dataframe[column_na])
                 list_target_not_none = [np.nan if v is None else v for v in list_target]
