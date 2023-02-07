@@ -37,6 +37,7 @@ print('Readed target')
 ids_test = [15, 23, 34, 52, 48, 44, 42, 21, 45, 60, 6, 5]
 
 df_to_predict = df.filter(items=ids_test, axis=0)
+df_to_predict = df[df['ID_Muestra'].isin(ids_test)]
 
 predictor_object = Predictor()
 

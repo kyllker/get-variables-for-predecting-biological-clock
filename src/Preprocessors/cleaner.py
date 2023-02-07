@@ -15,8 +15,15 @@ class Cleaner:
     @staticmethod
     def filter_desired_columns(dataframe, list_columns_with_order):
         try:
+            with open(
+                os.path.join('src', 'model_store', 'saved_models', 'cleaner', 'columns_before_imput.pkl'),
+                    'wb') as f:
+                pickle.dump(list_columns_with_order, f)
             return dataframe.iloc[:, list_columns_with_order]
         except:
+            with open(os.path.join('src', 'model_store', 'saved_models', 'cleaner', 'columns_before_imput.pkl'),
+                      'wb') as f:
+                pickle.dump(dataframe.columns.values.tolist(), f)
             return dataframe
 
     @staticmethod

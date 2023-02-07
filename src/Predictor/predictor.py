@@ -18,7 +18,7 @@ class Predictor:
     def desired_columns_before_all(self, dataframe, path_best_model):
         list_columns_desired = \
             self.load_pickle(os.path.join(path_best_model, "cleaner", "columns_before_imput.pkl"))
-        return dataframe.loc[:, list_columns_desired]
+        return dataframe.iloc[:, list_columns_desired]
 
     def convert_dummies(self, dataframe, path_best_model):
         dataframe = dataframe.reset_index(drop=True)
@@ -68,8 +68,18 @@ class Predictor:
                     self.load_pickle(
                         os.path.join(path_best_model, 'imputer', algorithm_imput + '_regressor_' + column + '.pkl'))
                 df_aux = dataframe.loc[:, model_and_columns[1]].reset_index(drop=True)
+                if df_aux.isna().sum().sum() > 0:
+                    for col in df_aux.columns:
+                        if df_aux[col].isna().sum().sum() > 0:
+                            model_and_columns_mean = \
+                                self.load_pickle(
+                                    os.path.join(path_best_model, 'imputer', 'mean_regressor_' + col + '.pkl'))
+                            for row_df_aux in range(df_aux.shape[0]):
+                                if str(df_aux.loc[row_df_aux, col]) == 'nan':
+                                    df_aux.loc[row_df_aux, col] = model_and_columns_mean[1]
+
                 for i in range(dataframe.shape[0]):
-                    if pd.isnull(dataframe.loc[i, column]):
+                    if str(dataframe.loc[i, column]) == 'nan':
                         if (algorithm_imput == 'mean') or (algorithm_imput == 'mode'):
                             dataframe.loc[i, column] = model_and_columns[1]
                         else:
@@ -116,6 +126,7 @@ class Predictor:
             zip_ref.extractall(path_best_model)
 
         best_parameters = self.load_pickle(os.path.join(path_best_model, "best_parameters.pkl"))
+        print(best_parameters)
 
         id_muestra = list(dataframe['ID_Muestra'])
         dataframe_no_id = dataframe.drop('ID_Muestra', axis=1)
