@@ -52,11 +52,12 @@ class Ensemble:
         x_test = df_test.drop('target', axis=1)
         return x_train, x_test, y_train, y_test
 
-    def predict(self, filename, sheet, list_columns, target, algorithm_imput='knn',
+    def predict(self, df, list_columns, target, algorithm_imput='knn',
                 threshold_variance=0.05, threshold_importance=0.3, seed=42, algorithm_supervised='Linear',
                 ids_test=[0], activated_pca=False, n_components_pca=20):
-        df = self.read_data(filename, sheet)
+        # df = self.read_data(filename, sheet)
         print('Initial dataframe')
+
         print(df.shape)
         df_cleaned = self.cleaner_object.predict(df, list_columns, algorithm_imput)
         print('Cleaned dataframe')

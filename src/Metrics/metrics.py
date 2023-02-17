@@ -2,7 +2,8 @@ import pandas as pd
 import os
 import sys
 import math
-from sklearn.metrics import mean_squared_error
+import numpy as np
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 from matplotlib import pyplot
 import warnings
 warnings.filterwarnings('ignore')
@@ -21,6 +22,7 @@ class Metrics:
     def predict(self, list_result, algorithm_supervised='Linear'):
         self.list_result = list_result
         df_results = pd.DataFrame()
+        df_results['ID'] = self.list_result[0]
         df_results['Predict'] = self.list_result[1]
         df_results['Predict'] = df_results['Predict'].apply(self.round_2_decimals)
         df_results['True'] = self.list_result[2]
@@ -31,6 +33,7 @@ class Metrics:
         df_results.to_csv(os.path.join('Results', 'PredictedVsTrue.csv'), index=False)
         print(df_results)
         rmse = math.sqrt(mean_squared_error(list(df_results['Predict']), list(df_results['True'])))
+        mae = mean_absolute_error(list(df_results['True']), list(df_results['Predict']))
         print('El rmse entre el ' + algorithm_supervised + ' model y el reloj biológico DNAmGrimAge es: ' + str(rmse))
         errors = list()
         for i in range(len(list(df_results['Predict']))):
@@ -45,7 +48,7 @@ class Metrics:
         f.clear()
         pyplot.close(f)
 
-        return rmse
+        return rmse, mae, df_results
 
 
 

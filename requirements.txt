@@ -6,3 +6,6 @@ seaborn==0.12.2
 matplotlib==3.6.2
 lightgbm==3.3.4
 zipfile36==0.1.3
+tk==0.1.0
+Pillow==9.4.0
+pandastable==0.13.0
