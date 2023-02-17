@@ -11,7 +11,7 @@ class PCAModel:
 
     def predict(self, x_train, ncomponents=20):
         x_train_no_edad = x_train.drop(columns=['ID_Muestra', 'Edad_Cronologica'])
-        if x_train.shape[1] <= 50:
+        if x_train.shape[1] <= ncomponents:
             return x_train
         else:
             pca = sk_pca(n_components=ncomponents, random_state=self.seed)
