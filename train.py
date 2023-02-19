@@ -12,7 +12,9 @@ simplefilter("ignore", category=RuntimeWarning)
 
 
 class Train:
-    def __init__(self, list_columns, df_data, label_name, parameters, individual_all='Individual', ids_test=[]):
+    def __init__(self, list_columns, df_data, label_name, id_column, parameters, individual_all='Individual', ids_test=[]):
+        self.name_column_target = label_name
+        self.name_id_column = id_column
         self.list_columns = list_columns
         self.df_data = df_data
         self.target = list(self.df_data[label_name])
@@ -21,9 +23,10 @@ class Train:
         self.individual_all = individual_all
         self.ids_test = ids_test
 
+
     def predict(self):
         seed = 42
-        ensemble_object = Ensemble(seed)
+        ensemble_object = Ensemble(seed, self.name_column_target)
 
         if self.individual_all == 'Individual':
 
@@ -37,6 +40,7 @@ class Train:
             rmse, mae, df = ensemble_object.predict(df=self.df_data,
                                                     list_columns=self.list_columns,
                                                     target=self.target,
+                                                    id_column=self.name_id_column,
                                                     # ids_test=[15, 23, 34, 52, 48, 44, 42, 21, 45, 60, 6, 5],
                                                     ids_test=self.ids_test,
                                                     algorithm_imput=self.parameters.get('algorithm_imput'),
@@ -78,20 +82,23 @@ class Train:
                         for algorithm_imput in algorithms_imput:
                             for threshold_variance in threshold_variances:
                                 for threshold_importance in threshold_importances:
-                                    print(algorithm_supervised + ' - ' + algorithm_imput + ' - ' + str(threshold_variance) +
-                                          ' - ' + str(threshold_importance) + ' - ' + str(ncom) + ' - ' + str(act_pca))
-                                    rmse, mae, df = ensemble_object.predict(df=self.df_data,
-                                                                   list_columns=self.list_columns,
-                                                                   target=self.target,
-                                                                   ids_test=self.ids_test,
-                                                                   algorithm_imput=algorithm_imput,
-                                                                   threshold_variance=threshold_variance,
-                                                                   threshold_importance=threshold_importance,
-                                                                   seed=42,
-                                                                   algorithm_supervised=algorithm_supervised,
-                                                                   activated_pca=act_pca,
-                                                                   n_components_pca=ncom
-                                                                   )
+                                    print(algorithm_supervised + ' - ' + algorithm_imput + ' - ' +
+                                          str(threshold_variance) + ' - ' + str(threshold_importance) + ' - ' +
+                                          str(ncom) + ' - ' + str(act_pca))
+                                    rmse, mae, df = ensemble_object.predict(
+                                        df=self.df_data,
+                                        list_columns=self.list_columns,
+                                        target=self.target,
+                                        id_column=self.id_column,
+                                        ids_test=self.ids_test,
+                                        algorithm_imput=algorithm_imput,
+                                        threshold_variance=threshold_variance,
+                                        threshold_importance=threshold_importance,
+                                        seed=42,
+                                        algorithm_supervised=algorithm_supervised,
+                                        activated_pca=act_pca,
+                                        n_components_pca=ncom
+                                        )
                                     print('rmse')
                                     print(rmse)
                                     print('min_rmse')
@@ -113,18 +120,5 @@ class Train:
                                                          str(round(rmse, 3)).replace('.', '_')),
                                             'zip', os.path.join('src', 'model_store', 'saved_models'))
                                     print(best_parameters)
-                    # Launch the best
-            print(best_parameters)
-            rmse, mae, df = ensemble_object.predict(df=self.df_data,
-                                                    list_columns=self.list_columns,
-                                                    target=self.target,
-                                                    ids_test=self.ids_test,
-                                                    algorithm_imput=best_parameters.get('algorithm_imput'),
-                                                    threshold_variance=best_parameters.get('threshold_variance'),
-                                                    threshold_importance=best_parameters.get('threshold_importance'),
-                                                    seed=42,
-                                                    algorithm_supervised=best_parameters.get('algorithm_supervised'),
-                                                    activated_pca=best_parameters.get('activated_pca'),
-                                                    n_components_pca=best_parameters.get('n_components_pca')
-                                                    )
+
             return rmse, mae, df

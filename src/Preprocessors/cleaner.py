@@ -135,9 +135,9 @@ class Cleaner:
             pickle.dump(list_columns_normalized, f)
         return normalized_dataframe
 
-    def predict(self, dataframe, list_columns_with_order, algorithm='knn'):
-        id_muestra = pd.DataFrame(dataframe['ID_Muestra'])
-        dataframe_no_id = dataframe.drop('ID_Muestra', axis=1)
+    def predict(self, dataframe, list_columns_with_order, id_column, algorithm='knn'):
+        id_muestra = pd.DataFrame(dataframe[id_column])
+        dataframe_no_id = dataframe.drop(id_column, axis=1)
         dataframe_desired_columns = self.filter_desired_columns(dataframe_no_id, list_columns_with_order)
         dataframe_numerical_values = \
             self.convert_to_numerical_values_column_with_two_different_values(dataframe_desired_columns)

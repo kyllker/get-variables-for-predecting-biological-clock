@@ -15,12 +15,12 @@ from src.Metrics.metrics import Metrics
 
 class Ensemble:
 
-    def __init__(self, seed):
+    def __init__(self, seed, name_column_target):
         self.cleaner_object = Cleaner(seed)
-        self.feature_selection_object = FeatureSelection(seed)
+        self.feature_selection_object = FeatureSelection(seed, name_column_target)
         self.pca_object = PCAModel(seed)
-        self.supervised_model_object = SupervisedModel(seed)
-        self.metric_object = Metrics()
+        self.supervised_model_object = SupervisedModel(seed, name_column_target)
+        self.metric_object = Metrics(name_column_target)
         self.seed = seed
 
     @staticmethod
@@ -52,22 +52,22 @@ class Ensemble:
         x_test = df_test.drop('target', axis=1)
         return x_train, x_test, y_train, y_test
 
-    def predict(self, df, list_columns, target, algorithm_imput='knn',
+    def predict(self, df, list_columns, target, id_column, algorithm_imput='knn',
                 threshold_variance=0.05, threshold_importance=0.3, seed=42, algorithm_supervised='Linear',
-                ids_test=[0], activated_pca=False, n_components_pca=20):
+                ids_test=[], activated_pca=False, n_components_pca=20):
         # df = self.read_data(filename, sheet)
         print('Initial dataframe')
 
         print(df.shape)
-        df_cleaned = self.cleaner_object.predict(df, list_columns, algorithm_imput)
+        df_cleaned = self.cleaner_object.predict(df, list_columns, id_column, algorithm_imput)
         print('Cleaned dataframe')
         print(df_cleaned.shape)
         df_feature_selection = self.feature_selection_object.predict(
-            df_cleaned, target, threshold_variance, threshold_importance)
+            df_cleaned, target, id_column, threshold_variance, threshold_importance)
         print('Feature selection dataframe')
         print(df_feature_selection.shape)
         if activated_pca:
-            df_pca = self.pca_object.predict(df_feature_selection, ncomponents=n_components_pca)
+            df_pca = self.pca_object.predict(df_feature_selection, id_column, ncomponents=n_components_pca)
         else:
             df_pca = df_feature_selection.copy()
         print('PCA dataframe')
@@ -75,7 +75,7 @@ class Ensemble:
         # x_train, x_test, y_train, y_test = self.split_train_test_random(df_pca, target, seed)
         x_train, x_test, y_train, y_test = self.split_train_test_manual(df_pca, target, ids_test)
         print("Size X_train="+str(x_train.shape) + " Size X_test="+str(x_test.shape))
-        list_supervided_result = self.supervised_model_object.predict(x_train, y_train, x_test,
+        list_supervided_result = self.supervised_model_object.predict(x_train, y_train, x_test, id_column,
                                                                       seed, algorithm_supervised)
         list_result = [list_supervided_result[0], list_supervided_result[1], list(y_test)]
         return self.metric_object.predict(list_result, algorithm_supervised)

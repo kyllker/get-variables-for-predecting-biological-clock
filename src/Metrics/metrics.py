@@ -12,8 +12,9 @@ sys.path.append(project_dir)
 
 
 class Metrics:
-    def __init__(self):
+    def __init__(self, name_column_target):
         self.list_result = []
+        self.name_column_target = name_column_target
 
     @staticmethod
     def round_2_decimals(number):
@@ -30,7 +31,8 @@ class Metrics:
         df_results = df_results.sort_values(by=['True'])
         print('Results shape')
         print(df_results.shape)
-        df_results.to_csv(os.path.join('Results', 'PredictedVsTrue.csv'), index=False)
+        df_results = df_results.round({'ID': 0, 'Predict': 2, 'True': 2})
+        df_results.to_csv(os.path.join('Results', self.name_column_target + '_PredictedVsTrue.csv'), index=False)
         print(df_results)
         rmse = math.sqrt(mean_squared_error(list(df_results['Predict']), list(df_results['True'])))
         mae = mean_absolute_error(list(df_results['True']), list(df_results['Predict']))
@@ -44,7 +46,7 @@ class Metrics:
         pyplot.xticks(ticks=[i for i in range(len(errors))], labels=list(df_results['Predict']))
         pyplot.xlabel('Predicted Value')
         pyplot.ylabel('Mean Squared Error')
-        pyplot.savefig(os.path.join('Results', 'graphics.png'))
+        pyplot.savefig(os.path.join('Results', self.name_column_target + '_graphics.png'))
         f.clear()
         pyplot.close(f)
 

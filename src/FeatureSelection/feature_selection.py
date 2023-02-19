@@ -13,8 +13,9 @@ from xgboost import XGBRegressor
 
 class FeatureSelection:
 
-    def __init__(self, seed):
+    def __init__(self, seed, name_column_target):
         self.seed = seed
+        self.name_column_target = name_column_target
 
     @staticmethod
     def drop_columns_little_variance(dataframe, threshold_variance):
@@ -58,14 +59,15 @@ class FeatureSelection:
 
         return dataframe.loc[:, selection_features]
 
-    def predict(self, dataframe, target, threshold_variance=0.05, threshold_importance=0.3):
-        id_muestra = pd.DataFrame(dataframe['ID_Muestra'])
-        dataframe_no_id = dataframe.drop('ID_Muestra', axis=1)
+    def predict(self, dataframe, target, id_column, threshold_variance=0.05, threshold_importance=0.3):
+        id_muestra = pd.DataFrame(dataframe[id_column])
+        dataframe_no_id = dataframe.drop(id_column, axis=1)
         dataframe_big_variance = self.drop_columns_little_variance(dataframe_no_id, threshold_variance)
         dataframe_ml_selection = \
             self.feature_selection_with_ml_algorithms(dataframe_big_variance, target, threshold_importance)
         with open(os.path.join('src', 'model_store', 'saved_models', 'feature_selection',
-                               'columns_selected_' + str(threshold_variance).replace('.', '') + '_'
+                               self.name_column_target + '_columns_selected_' +
+                               str(threshold_variance).replace('.', '') + '_'
                                + str(threshold_importance).replace('.', '') + '.pkl'), 'wb') as f:
             pickle.dump(dataframe_ml_selection.columns.values.tolist(), f)
         cleaned_dataframe = pd.concat([id_muestra, dataframe_ml_selection], 1)
