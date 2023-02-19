@@ -11,7 +11,7 @@ from src.Ensemble.ensemble import Ensemble
 class TestEnsemble:
     def setup_class(self):
         self.seed = 42
-        self.ensemble_object = Ensemble(self.seed)
+        self.ensemble_object = Ensemble(self.seed, 'ID_Muestra')
         self.df = pd.DataFrame([[1, 1], [1, 2]], columns=['A', 'B'])
         self.df_no_numerical = pd.DataFrame([['a', 'b'], ['c', 'd']], columns=['A', 'B'])
 
