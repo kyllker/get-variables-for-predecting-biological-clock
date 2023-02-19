@@ -15,7 +15,7 @@ from src.Models.supervised_models import SupervisedModel
 class TestSupervisedModel:
     def setup_class(self):
         self.seed = 42
-        self.supervised_model_object = SupervisedModel(self.seed)
+        self.supervised_model_object = SupervisedModel(self.seed, 'ID_Muestra')
         self.df = pd.DataFrame([[1, 1], [1, 2]], columns=['A', 'B'])
         self.df_no_numerical = pd.DataFrame([['a', 'b'], ['c', 'd']], columns=['A', 'B'])
         self.iris = load_iris()

@@ -16,8 +16,9 @@ warnings.filterwarnings('ignore')
 
 class SupervisedModel:
 
-    def __init__(self, seed):
+    def __init__(self, seed, name_column_target):
         self.seed = seed
+        self.name_column_target = name_column_target
 
     def linear_model(self, x_train, y_train):
         folds = KFold(n_splits=10, shuffle=True, random_state=self.seed)
@@ -33,8 +34,8 @@ class SupervisedModel:
                                 return_train_score=True
                                 )
         model_cv.fit(x_train, y_train)
-        with open(os.path.join('src', 'model_store', 'saved_models', 'supervised_models', 'Linear_model.pkl'),
-                  'wb') as f:
+        with open(os.path.join('src', 'model_store', 'saved_models', 'supervised_models',
+                               self.name_column_target + '_Linear_model.pkl'), 'wb') as f:
             pickle.dump(model_cv, f)
         return model_cv
 
@@ -66,8 +67,8 @@ class SupervisedModel:
                 best_estimator[0] = clf.best_estimator_
         clf = best_estimator[0]
         clf.fit(x_train, list(y_train))
-        with open(os.path.join('src', 'model_store', 'saved_models', 'supervised_models', 'XGBoost_model.pkl'),
-                  'wb') as f:
+        with open(os.path.join('src', 'model_store', 'saved_models', 'supervised_models',
+                               self.name_column_target + '_XGBoost_model.pkl'), 'wb') as f:
             pickle.dump(clf, f)
         return clf
 
@@ -106,15 +107,15 @@ class SupervisedModel:
                 best_estimator[0] = clf.best_estimator_
         clf = best_estimator[0]
         clf.fit(x_train, list(y_train))
-        with open(os.path.join('src', 'model_store', 'saved_models', 'supervised_models', 'LightGBM_model.pkl'),
-                  'wb') as f:
+        with open(os.path.join('src', 'model_store', 'saved_models', 'supervised_models',
+                               self.name_column_target + '_LightGBM_model.pkl'), 'wb') as f:
             pickle.dump(clf, f)
         return clf
 
-    def predict(self, x_train, y_train, x_test, seed, algorithm='Linear'):
-        x_train_no_id = x_train.drop('ID_Muestra', axis=1)
-        id_muestra_test = list(x_test['ID_Muestra'])
-        x_test_no_id = x_test.drop('ID_Muestra', axis=1)
+    def predict(self, x_train, y_train, x_test, id_column, seed=42, algorithm='Linear'):
+        x_train_no_id = x_train.drop(id_column, axis=1)
+        id_muestra_test = list(x_test[id_column])
+        x_test_no_id = x_test.drop(id_column, axis=1)
         x_train_no_id = x_train_no_id.astype(float)
         x_test_no_id = x_test_no_id.astype(float)
 

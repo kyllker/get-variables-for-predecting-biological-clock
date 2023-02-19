@@ -178,6 +178,10 @@ class Frontend:
             'activated_pca': self.pca_algorithm_value.get(),
             'n_components_pca': self.ncomp_pca_value.get()
         }
+        separator3 = ttk.Separator(self.window, orient='vertical')
+        separator3.place(relx=0.8, rely=0, relwidth=0.2, relheight=1)
+
+        tk.Button(self.window, text='Predict New Data', command=None, width=12).place(x=1580, y=100)
 
     def upload_action_excel_file(self, sheet):
         if len(str(sheet)) > 0:
@@ -238,6 +242,7 @@ class Frontend:
     def train_single_model(self):
         col_name_ids = self.retrieve_input(self.id_text)
         label_name = self.retrieve_input(self.label_text)
+        id_column = self.retrieve_input(self.id_text)
         self.parameters = {
             'algorithm_imput': self.algorithm_imput_value.get(),
             'threshold_variance': self.threshold_variance_value.get(),
@@ -250,6 +255,7 @@ class Frontend:
             tk.messagebox.showerror('Ids Error', 'You have to select random ids or upload your own ids')
         elif self.check_random_test.get() == 1:
             df_aux = self.df_data.sample(frac=0.20, axis='rows')
+
             ids_test = list(df_aux[col_name_ids])
             if len(self.desired_columns) > 0:
                 list_columns = self.desired_columns
@@ -259,12 +265,13 @@ class Frontend:
             train_object = Train(list_columns=list_columns,
                                  df_data=self.df_data,
                                  label_name=label_name,
+                                 id_column=id_column,
                                  parameters=self.parameters,
                                  individual_all='Individual',
                                  ids_test=ids_test)
             rmse, mae, df = train_object.predict()
             tk.messagebox.showinfo(title="Train finished", message="Train is finished successfully")
-            image1 = Image.open(os.path.join('Results', 'graphics.png'))
+            image1 = Image.open(os.path.join('Results', label_name + '_graphics.png'))
             image1 = image1.resize((480, 360), Image.ANTIALIAS)
             img = ImageTk.PhotoImage(image1)
 
@@ -280,22 +287,41 @@ class Frontend:
             frame.pack(pady=0, side="top", anchor="w")
             frame.place(x=800, y=500)
             table = Table(frame, showtoolbar=True, showstatusbar=True)
-            table.importCSV(os.path.join('Results', 'PredictedVsTrue.csv'))
+            table.importCSV(os.path.join('Results', label_name + '_PredictedVsTrue.csv'))
             table.show()
 
-
-
-
         else:
-            df_aux = self.df_data.sample(frac=0.20, axis='rows')
-            ids_test = list(df_aux[col_name_ids])
-            train_object = Train(list_columns=self.list_columns,
+            if len(self.desired_columns) > 0:
+                list_columns = self.desired_columns
+            else:
+                list_columns = self.df_data.columns.values.tolist()
+            train_object = Train(list_columns=list_columns,
                                  df_data=self.df_data,
                                  label_name=label_name,
+                                 id_column=id_column,
                                  parameters=self.parameters,
                                  individual_all='Individual',
-                                 ids_test=ids_test)
-            train_object.predict()
+                                 ids_test=self.ids_test)
+            rmse, mae, df = train_object.predict()
+
+            image1 = Image.open(os.path.join('Results', label_name + '_graphics.png'))
+            image1 = image1.resize((480, 360), Image.ANTIALIAS)
+            img = ImageTk.PhotoImage(image1)
+
+            image_display = tkinter.Label(image=img)
+            image_display.image = img
+            image_display.place(x=800, y=50)
+
+            label_metric = tk.Label(self.window, text="RMSE: " + str(round(rmse, 3)) + "\nMAE: " + str(round(mae, 3)))
+            label_metric.pack(pady=0, side="top", anchor="w")
+            label_metric.place(x=800, y=450)
+
+            frame = tk.Frame(self.window)
+            frame.pack(pady=0, side="top", anchor="w")
+            frame.place(x=800, y=500)
+            table = Table(frame, showtoolbar=True, showstatusbar=True)
+            table.importCSV(os.path.join('Results', label_name + '_PredictedVsTrue.csv'))
+            table.show()
             tk.messagebox.showinfo(title="Train finished", message="Train is finished successfully")
 
     def start(self) -> None:

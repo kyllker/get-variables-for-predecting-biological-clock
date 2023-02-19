@@ -13,7 +13,7 @@ class TestFeatureSelection:
     def setup_class(self):
 
         self.seed = 42
-        self.feature_selection_object = FeatureSelection(self.seed)
+        self.feature_selection_object = FeatureSelection(self.seed, 'ID_Muestra')
 
         self.df = pd.DataFrame([[1, 1, 2], [1.001, 2, 4]], columns=['A', 'B', 'C'])
 

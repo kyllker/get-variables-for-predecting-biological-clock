@@ -9,8 +9,13 @@ class PCAModel:
     def __init__(self, seed):
         self.seed = seed
 
-    def predict(self, x_train, ncomponents=20):
-        x_train_no_edad = x_train.drop(columns=['ID_Muestra', 'Edad_Cronologica'])
+    def predict(self, x_train, id_column, ncomponents=20):
+        edad_cronologica = True
+        if 'Edad_Cronologica' in x_train.columns.values.tolist():
+            x_train_no_edad = x_train.drop(columns=[id_column, 'Edad_Cronologica'])
+        else:
+            x_train_no_edad = x_train.drop(columns=[id_column])
+            edad_cronologica = False
         if x_train.shape[1] <= ncomponents:
             return x_train
         else:
@@ -20,6 +25,10 @@ class PCAModel:
             with open(os.path.join('src', 'model_store', 'saved_models', 'pca', 'pca_model.pkl'), 'wb') as f:
                 pickle.dump([pca, pca_columns], f)
             df_pca = pd.DataFrame(array_pca)
-            df_reduced_dimensionality = pd.concat(
-                [x_train.loc[:, ['ID_Muestra', 'Edad_Cronologica']], df_pca], 1)
+            if edad_cronologica:
+                df_reduced_dimensionality = pd.concat(
+                    [x_train.loc[:, [id_column, 'Edad_Cronologica']], df_pca], 1)
+            else:
+                df_reduced_dimensionality = pd.concat(
+                    [x_train.loc[:, [id_column]], df_pca], 1)
             return df_reduced_dimensionality
