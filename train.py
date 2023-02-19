@@ -77,14 +77,54 @@ class Train:
             ncomponents_pca = [5, 10, 20, 50]
             min_rmse = 1000
             for act_pca in bool_pca:
-                for ncom in ncomponents_pca:
-                    for algorithm_supervised in algorithms_supervised:
-                        for algorithm_imput in algorithms_imput:
-                            for threshold_variance in threshold_variances:
-                                for threshold_importance in threshold_importances:
+                for algorithm_supervised in algorithms_supervised:
+                    for algorithm_imput in algorithms_imput:
+                        for threshold_variance in threshold_variances:
+                            for threshold_importance in threshold_importances:
+                                if act_pca:
+                                    for ncom in ncomponents_pca:
+                                        print(algorithm_supervised + ' - ' + algorithm_imput + ' - ' +
+                                              str(threshold_variance) + ' - ' + str(threshold_importance) + ' - ' +
+                                              str(ncom) + ' - ' + str(act_pca))
+                                        rmse, mae, df = ensemble_object.predict(
+                                            df=self.df_data,
+                                            list_columns=self.list_columns,
+                                            target=self.target,
+                                            id_column=self.id_column,
+                                            ids_test=self.ids_test,
+                                            algorithm_imput=algorithm_imput,
+                                            threshold_variance=threshold_variance,
+                                            threshold_importance=threshold_importance,
+                                            seed=42,
+                                            algorithm_supervised=algorithm_supervised,
+                                            activated_pca=act_pca,
+                                            n_components_pca=ncom
+                                            )
+                                        print('rmse')
+                                        print(rmse)
+                                        print('min_rmse')
+                                        print(min_rmse)
+                                        if rmse < min_rmse:
+                                            min_rmse = rmse
+                                            best_parameters = {
+                                                'algorithm_imput': algorithm_imput,
+                                                'threshold_variance': threshold_variance,
+                                                'threshold_importance': threshold_importance,
+                                                'algorithm_supervised': algorithm_supervised,
+                                                'activated_pca': act_pca,
+                                                'n_components_pca': ncom
+                                            }
+                                            with open(os.path.join('src', 'model_store', 'best_parameters.pkl'), 'wb') as f:
+                                                pickle.dump(best_parameters, f)
+                                            shutil.make_archive(
+                                                os.path.join('src', 'model_store', 'compressed_model', 'best_model_',
+                                                             str(round(rmse, 3)).replace('.', '_')),
+                                                'zip', os.path.join('src', 'model_store', 'saved_models'))
+                                        print(best_parameters)
+                                else:
                                     print(algorithm_supervised + ' - ' + algorithm_imput + ' - ' +
                                           str(threshold_variance) + ' - ' + str(threshold_importance) + ' - ' +
-                                          str(ncom) + ' - ' + str(act_pca))
+                                          str(0) + ' - ' + str(act_pca))
                                     rmse, mae, df = ensemble_object.predict(
                                         df=self.df_data,
                                         list_columns=self.list_columns,
@@ -97,8 +137,8 @@ class Train:
                                         seed=42,
                                         algorithm_supervised=algorithm_supervised,
                                         activated_pca=act_pca,
-                                        n_components_pca=ncom
-                                        )
+                                        n_components_pca=0
+                                    )
                                     print('rmse')
                                     print(rmse)
                                     print('min_rmse')
@@ -120,5 +160,4 @@ class Train:
                                                          str(round(rmse, 3)).replace('.', '_')),
                                             'zip', os.path.join('src', 'model_store', 'saved_models'))
                                     print(best_parameters)
-
             return rmse, mae, df
