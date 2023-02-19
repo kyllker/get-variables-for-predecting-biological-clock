@@ -16,7 +16,7 @@ class PCAModel:
         else:
             x_train_no_edad = x_train.drop(columns=[id_column])
             edad_cronologica = False
-        if x_train.shape[1] <= ncomponents:
+        if x_train_no_edad.shape[1] <= ncomponents:
             return x_train
         else:
             pca = sk_pca(n_components=ncomponents, random_state=self.seed)
