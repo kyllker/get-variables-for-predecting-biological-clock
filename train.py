@@ -128,7 +128,7 @@ class Train:
                                         df=self.df_data,
                                         list_columns=self.list_columns,
                                         target=self.target,
-                                        id_column=self.id_column,
+                                        id_column=self.name_id_column,
                                         ids_test=self.ids_test,
                                         algorithm_imput=algorithm_imput,
                                         threshold_variance=threshold_variance,
