@@ -241,7 +241,6 @@ class Frontend:
                 df = dfs[sheet]
                 self.df_data_predict = df.copy()
                 self.filename_data_predict = filename.split(os.sep)[-1]
-                return df, filename_data
             except:
                 tk.messagebox.showerror('Excel file Error', 'Error: ' + str(sheet) + ' is not a valid sheet')
         else:
