@@ -7,13 +7,17 @@ import pickle
 from PIL import ImageTk, Image
 from tkinter import ttk
 from train import Train
+from predict import Predict
 
 
 class Frontend:
     def __init__(self):
         self.df_data = pd.DataFrame()
         self.filename_data = ''
+        self.df_data_predict = pd.DataFrame()
+        self.filename_data_predict = ''
         self.desired_columns = []
+        self.filename_model = ''
         self.window = tk.Tk()
         self.window.geometry("1800x850")
 
@@ -80,7 +84,7 @@ class Frontend:
         self.button_ids_file.pack(pady=20, side="top", anchor="w")
 
         separator1 = ttk.Separator(self.window, orient='vertical')
-        separator1.place(relx=0.2, rely=0, relwidth=0.2, relheight=1)
+        separator1.place(relx=0.185, rely=0, relwidth=0.2, relheight=1)
 
         parameters_label = tk.Label(self.window, text="PARAMETERS", font='Helvetica 15', padx=10, pady=10)
         parameters_label.place(x=360, y=10)
@@ -163,12 +167,12 @@ class Frontend:
         tk.Radiobutton(self.algorithm_supervised, text='ALL', variable=self.algorithm_supervised_value,
                        value='Ensemble').pack(side=tk.TOP)
 
-        tk.Button(self.window, text='Train Individual', command=self.train_single_model, width=12).place(x=380, y=750)
+        tk.Button(self.window, text='Train Individual', command=self.train_single_model, width=12).place(x=360, y=750)
 
-        tk.Button(self.window, text='Train All Parameters', command=self.train_all_parameters, width=16).place(x=520, y=750)
+        tk.Button(self.window, text='Train All Parameters', command=self.train_all_parameters, width=16).place(x=500, y=750)
 
         separator2 = ttk.Separator(self.window, orient='vertical')
-        separator2.place(relx=0.4, rely=0, relwidth=0.2, relheight=1)
+        separator2.place(relx=0.37, rely=0, relwidth=0.2, relheight=1)
 
         self.parameters = {
             'algorithm_imput': self.algorithm_imput_value.get(),
@@ -179,9 +183,37 @@ class Frontend:
             'n_components_pca': self.ncomp_pca_value.get()
         }
         separator3 = ttk.Separator(self.window, orient='vertical')
-        separator3.place(relx=0.8, rely=0, relwidth=0.2, relheight=1)
+        separator3.place(relx=0.7, rely=0, relwidth=0.2, relheight=1)
 
-        tk.Button(self.window, text='Predict New Data', command=None, width=12).place(x=1580, y=100)
+        self.label_sheet_name_predict = tk.Label(self.window, text="Name of the sheet")
+        self.label_sheet_name_predict.pack(pady=0, side="top", anchor="w")
+        self.label_sheet_name_predict.place(x=1280, y=50)
+        self.sheet_name_predict = tk.Text(self.window, width=20, height=1)
+        self.sheet_name_predict.insert(tk.INSERT, "")
+        self.sheet_name_predict.pack(pady=20, side="top", anchor="w")
+        self.sheet_name_predict.place(x=1280, y=85)
+
+        self.button_excel_file_predict = tk.Button(self.window, text='Select Excel File with Data for predicting',
+                                                   command=lambda: self.upload_action_excel_file_predict(
+                                                    self.retrieve_input(self.sheet_name_predict)))
+        self.button_excel_file_predict.pack(pady=20, side="top", anchor="w")
+        self.button_excel_file_predict.place(x=1280, y=120)
+
+        self.id_name_predict = tk.Label(self.window, text="Type the id name")
+        self.id_name_predict.pack(pady=0, side="top", anchor="w")
+        self.id_name_predict.place(x=1280, y=160)
+        self.id_text_predict = tk.Text(self.window, width=20, height=1)
+        self.id_text_predict.insert(tk.INSERT, "ID_Muestra")
+        self.id_text_predict.pack(pady=20, side="top", anchor="w")
+        self.id_text_predict.place(x=1280, y=190)
+
+        self.button_model_predict = tk.Button(self.window, text='Select Model', command=lambda: self.upload_model())
+        self.button_model_predict.pack(pady=20, side="top", anchor="w")
+        self.button_model_predict.place(x=1280, y=220)
+
+        self.button_predict = tk.Button(self.window, text='PREDICT', command=lambda: None)
+        self.button_predict.pack(pady=20, side="top", anchor="w")
+        self.button_predict.place(x=1280, y=260)
 
     def upload_action_excel_file(self, sheet):
         if len(str(sheet)) > 0:
@@ -194,6 +226,22 @@ class Frontend:
                 self.df_data = df.copy()
                 self.filename_data = filename.split(os.sep)[-1]
                 self.label_data_loaded.config(text=self.filename_data + ' is loaded correctly')
+            except:
+                tk.messagebox.showerror('Excel file Error', 'Error: ' + str(sheet) + ' is not a valid sheet')
+        else:
+            tk.messagebox.showerror('Excel file Error', 'Error: ' + str(sheet) + ' is not a valid sheet')
+
+    def upload_action_excel_file_predict(self, sheet):
+        if len(str(sheet)) > 0:
+            try:
+                filename = tkinter.filedialog.askopenfilename(title='Open files')
+                xl_file = pd.ExcelFile(filename)
+                dfs = {sheet_name_upload_action: xl_file.parse(sheet_name_upload_action)
+                       for sheet_name_upload_action in xl_file.sheet_names}
+                df = dfs[sheet]
+                self.df_data_predict = df.copy()
+                self.filename_data_predict = filename.split(os.sep)[-1]
+                return df, filename_data
             except:
                 tk.messagebox.showerror('Excel file Error', 'Error: ' + str(sheet) + ' is not a valid sheet')
         else:
@@ -231,6 +279,12 @@ class Frontend:
                 self.ids_test = [int(col) for col in readed_ids]
             except:
                 tk.messagebox.showerror('No numeric columns', 'There are some columns no numeric')
+
+    def upload_model(self):
+            try:
+                self.filename_model = tkinter.filedialog.askopenfilename(title='Open files')
+            except:
+                tk.messagebox.showerror('Text file Error', 'Error: It is not available')
 
     def retrieve_input(self, my_text_box):
         input = my_text_box.get("1.0", tk.END)
@@ -277,17 +331,18 @@ class Frontend:
 
             image_display = tkinter.Label(image=img)
             image_display.image = img
-            image_display.place(x=800, y=50)
+            image_display.place(x=680, y=50)
 
             label_metric = tk.Label(self.window, text="RMSE: " + str(round(rmse, 3)) + "\nMAE: " + str(round(mae, 3)))
             label_metric.pack(pady=0, side="top", anchor="w")
-            label_metric.place(x=800, y=450)
+            label_metric.place(x=680, y=450)
 
             frame = tk.Frame(self.window)
             frame.pack(pady=0, side="top", anchor="w")
-            frame.place(x=800, y=500)
+            frame.place(x=680, y=500)
             table = Table(frame, showtoolbar=True, showstatusbar=True)
             table.importCSV(os.path.join('Results', label_name + '_PredictedVsTrue.csv'))
+            table.autoResizeColumns()
             table.show()
 
         else:
@@ -310,17 +365,18 @@ class Frontend:
 
             image_display = tkinter.Label(image=img)
             image_display.image = img
-            image_display.place(x=800, y=50)
+            image_display.place(x=680, y=50)
 
             label_metric = tk.Label(self.window, text="RMSE: " + str(round(rmse, 3)) + "\nMAE: " + str(round(mae, 3)))
             label_metric.pack(pady=0, side="top", anchor="w")
-            label_metric.place(x=800, y=450)
+            label_metric.place(x=680, y=450)
 
             frame = tk.Frame(self.window)
             frame.pack(pady=0, side="top", anchor="w")
-            frame.place(x=800, y=500)
+            frame.place(x=680, y=500)
             table = Table(frame, showtoolbar=True, showstatusbar=True)
             table.importCSV(os.path.join('Results', label_name + '_PredictedVsTrue.csv'))
+            table.autoResizeColumns()
             table.show()
             tk.messagebox.showinfo(title="Train finished", message="Train is finished successfully")
 

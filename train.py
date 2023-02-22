@@ -68,13 +68,17 @@ class Train:
             return rmse, mae, df
 
         else:
+            best_parameters = {}
             algorithms_imput = ['mean_mode', 'knn', 'linear', 'svm', 'xgboost', 'ensemble']
+            algorithms_imput = ['knn', 'linear', 'svm', 'xgboost']
             threshold_variances = [0.01, 0.05, 0.07]
             threshold_importances = [20, 30, 50]
             algorithms_supervised = ['Linear', 'XGBoost', 'Ensemble']
-            bool_pca = [True, False]
+            algorithms_supervised = ['Linear', 'XGBoost']
+            bool_pca = [False, True]
+            bool_pca = [True]
             ncomponents_pca = [5, 10, 20, 50]
-            min_rmse = 1000
+            min_rmse = 2.2
             for act_pca in bool_pca:
                 for algorithm_supervised in algorithms_supervised:
                     for algorithm_imput in algorithms_imput:
@@ -113,10 +117,11 @@ class Train:
                                                 'activated_pca': act_pca,
                                                 'n_components_pca': ncom
                                             }
-                                            with open(os.path.join('src', 'model_store', 'best_parameters.pkl'), 'wb') as f:
+                                            with open(os.path.join('src', 'model_store', 'saved_models',
+                                                                   'best_parameters.pkl'), 'wb') as f:
                                                 pickle.dump(best_parameters, f)
                                             shutil.make_archive(
-                                                os.path.join('src', 'model_store', 'compressed_model', 'best_model_',
+                                                os.path.join('src', 'model_store', 'compressed_model', 'best_model_' +
                                                              str(round(rmse, 3)).replace('.', '_')),
                                                 'zip', os.path.join('src', 'model_store', 'saved_models'))
                                         print(best_parameters)
@@ -150,12 +155,13 @@ class Train:
                                             'threshold_importance': threshold_importance,
                                             'algorithm_supervised': algorithm_supervised,
                                             'activated_pca': act_pca,
-                                            'n_components_pca': ncom
+                                            'n_components_pca': 0
                                         }
-                                        with open(os.path.join('src', 'model_store', 'best_parameters.pkl'), 'wb') as f:
+                                        with open(os.path.join('src', 'model_store', 'saved_models',
+                                                               'best_parameters.pkl'), 'wb') as f:
                                             pickle.dump(best_parameters, f)
                                         shutil.make_archive(
-                                            os.path.join('src', 'model_store', 'compressed_model', 'best_model_',
+                                            os.path.join('src', 'model_store', 'compressed_model', 'best_model_' +
                                                          str(round(rmse, 3)).replace('.', '_')),
                                             'zip', os.path.join('src', 'model_store', 'saved_models'))
                                     print(best_parameters)
