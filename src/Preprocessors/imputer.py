@@ -28,7 +28,7 @@ class Imputer:
         dataframe_sum_na = dataframe.isna().sum()
         dataframe_nas_by_column = dataframe_sum_na.loc[lambda x: x > 0]
         list_na_columns = list(dataframe_nas_by_column.sort_values(ascending=True).index)
-        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'order_columns_imputer.pkl'),
+        with open(os.path.join('model_store', 'saved_models', 'imputer', 'order_columns_imputer.pkl'),
                   'wb') as f:
             pickle.dump(list_na_columns, f)
         return list_na_columns
@@ -49,7 +49,7 @@ class Imputer:
     def mean_or_mode_classifier(_, y_train, x_predict, column_name):
         y_train = [x for x in y_train if str(x) != 'nan']
         mode_value = max(set(y_train), key=y_train.count)
-        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'mode_classifier_' + column_name + '.pkl'), 'wb') as f:
+        with open(os.path.join('model_store', 'saved_models', 'imputer', 'mode_classifier_' + column_name + '.pkl'), 'wb') as f:
             pickle.dump([column_name, mode_value], f)
         return [mode_value for _ in range(x_predict.shape[0])]
 
@@ -57,7 +57,7 @@ class Imputer:
     def mean_or_mode_regressor(_, y_train, x_predict, column_name):
         y_train = [x for x in y_train if str(x) != 'nan']
         mean_value = sum(y_train) / len(y_train)
-        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'mean_regressor_' + column_name + '.pkl'), 'wb') as f:
+        with open(os.path.join('model_store', 'saved_models', 'imputer', 'mean_regressor_' + column_name + '.pkl'), 'wb') as f:
             pickle.dump([column_name, mean_value], f)
         return [mean_value for _ in range(x_predict.shape[0])]
 
@@ -65,7 +65,7 @@ class Imputer:
     def linear_classifier(x_train, y_train, x_predict, column_name):
         linear_model = SGDClassifier(max_iter=1000, tol=1e-3)
         linear_model.fit(x_train, y_train)
-        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'linear_classifier_' + column_name + '.pkl'), 'wb') as f:
+        with open(os.path.join('model_store', 'saved_models', 'imputer', 'linear_classifier_' + column_name + '.pkl'), 'wb') as f:
             pickle.dump([linear_model, x_train.columns.values.tolist()], f)
         return linear_model.predict(x_predict)
 
@@ -73,7 +73,7 @@ class Imputer:
     def linear_regressor(x_train, y_train, x_predict, column_name):
         linear_model = LinearRegression()
         linear_model.fit(x_train, y_train)
-        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'linear_regressor_' + column_name + '.pkl'), 'wb') as f:
+        with open(os.path.join('model_store', 'saved_models', 'imputer', 'linear_regressor_' + column_name + '.pkl'), 'wb') as f:
             pickle.dump([linear_model, x_train.columns.values.tolist()], f)
         return linear_model.predict(x_predict)
 
@@ -81,7 +81,7 @@ class Imputer:
     def knn_classifier(x_train, y_train, x_predict, column_name):
         knn = KNeighborsClassifier(n_neighbors=5)
         knn.fit(x_train, y_train)
-        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'knn_classifier_' + column_name + '.pkl'), 'wb') as f:
+        with open(os.path.join('model_store', 'saved_models', 'imputer', 'knn_classifier_' + column_name + '.pkl'), 'wb') as f:
             pickle.dump([knn, x_train.columns.values.tolist()], f)
         return knn.predict(x_predict)
 
@@ -89,13 +89,13 @@ class Imputer:
     def knn_regressor(x_train, y_train, x_predict, column_name):
         if len(y_train) < 5:
             y_res = [sum(y_train) / len(y_train) for _ in range(x_predict.shape[0])]
-            with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'knn_regressor_' + column_name + '.pkl'),
+            with open(os.path.join('model_store', 'saved_models', 'imputer', 'knn_regressor_' + column_name + '.pkl'),
                       'wb') as f:
                 pickle.dump([[column_name, sum(y_train) / len(y_train)], x_train.columns.values.tolist()], f)
         else:
             knn = KNeighborsRegressor(n_neighbors=5)
             knn.fit(x_train, y_train)
-            with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'knn_regressor_' + column_name + '.pkl'),
+            with open(os.path.join('model_store', 'saved_models', 'imputer', 'knn_regressor_' + column_name + '.pkl'),
                       'wb') as f:
                 pickle.dump([knn, x_train.columns.values.tolist()], f)
             y_res = knn.predict(x_predict)
@@ -105,7 +105,7 @@ class Imputer:
     def svm_classifier(x_train, y_train, x_predict, column_name):
         clf = svm.SVC(kernel='linear')
         clf.fit(x_train, y_train)
-        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'svm_classifier_' + column_name + '.pkl'),
+        with open(os.path.join('model_store', 'saved_models', 'imputer', 'svm_classifier_' + column_name + '.pkl'),
                   'wb') as f:
             pickle.dump([clf, x_train.columns.values.tolist()], f)
         return clf.predict(x_predict)
@@ -115,7 +115,7 @@ class Imputer:
         clf = svm.SVR(kernel='rbf')
         clf.fit(x_train, y_train)
         with open(os.path.join(
-                'src', 'model_store', 'saved_models', 'imputer', 'svm_regressor_' + column_name + '.pkl'), 'wb') as f:
+                'model_store', 'saved_models', 'imputer', 'svm_regressor_' + column_name + '.pkl'), 'wb') as f:
             pickle.dump([clf, x_train.columns.values.tolist()], f)
         return clf.predict(x_predict)
 
@@ -123,7 +123,7 @@ class Imputer:
         model = XGBClassifier(n_estimators=1000, max_depth=7, eta=0.1, subsample=0.7, colsample_bytree=0.8,
                               random_state=self.seed)
         model.fit(x_train, y_train)
-        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'xgboost_classifier_' + column_name + '.pkl'),
+        with open(os.path.join('model_store', 'saved_models', 'imputer', 'xgboost_classifier_' + column_name + '.pkl'),
                   'wb') as f:
             pickle.dump([model, x_train.columns.values.tolist()], f)
         return model.predict(x_predict)
@@ -132,7 +132,7 @@ class Imputer:
         model = XGBRegressor(n_estimators=1000, max_depth=7, eta=0.1, subsample=0.7, colsample_bytree=0.8,
                              random_state=self.seed)
         model.fit(x_train, y_train)
-        with open(os.path.join('src', 'model_store', 'saved_models', 'imputer', 'xgboost_regressor_' + column_name + '.pkl'),
+        with open(os.path.join('model_store', 'saved_models', 'imputer', 'xgboost_regressor_' + column_name + '.pkl'),
                   'wb') as f:
             pickle.dump([model, x_train.columns.values.tolist()], f)
         return model.predict(x_predict)

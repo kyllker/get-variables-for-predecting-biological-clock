@@ -58,25 +58,25 @@ class Train:
                 'activated_pca': self.parameters.get('activated_pca'),
                 'n_components_pca': self.parameters.get('n_components_pca')
             }
-            with open(os.path.join('src', 'model_store', 'saved_models', 'best_parameters.pkl'), 'wb') as f:
+            with open(os.path.join('model_store', 'saved_models', 'best_parameters.pkl'), 'wb') as f:
                 pickle.dump(best_parameters, f)
 
             shutil.make_archive(
-                    os.path.join('src', 'model_store', 'compressed_model', 'best_model_',
+                    os.path.join('model_store', 'compressed_model', 'best_model_',
                                  str(round(rmse, 3)).replace('.', '_')), 'zip',
-                    os.path.join('src', 'model_store', 'saved_models'))
+                    os.path.join('model_store', 'saved_models'))
             return rmse, mae, df
 
         else:
             best_parameters = {}
             algorithms_imput = ['mean_mode', 'knn', 'linear', 'svm', 'xgboost', 'ensemble']
-            algorithms_imput = ['knn', 'linear', 'svm', 'xgboost']
+            # algorithms_imput = ['knn', 'linear', 'svm', 'xgboost']
             threshold_variances = [0.01, 0.05, 0.07]
             threshold_importances = [20, 30, 50]
             algorithms_supervised = ['Linear', 'XGBoost', 'Ensemble']
-            algorithms_supervised = ['Linear', 'XGBoost']
+            # algorithms_supervised = ['Linear', 'XGBoost']
             bool_pca = [False, True]
-            bool_pca = [True]
+            # bool_pca = [True]
             ncomponents_pca = [5, 10, 20, 50]
             min_rmse = 2.2
             for act_pca in bool_pca:
@@ -117,13 +117,13 @@ class Train:
                                                 'activated_pca': act_pca,
                                                 'n_components_pca': ncom
                                             }
-                                            with open(os.path.join('src', 'model_store', 'saved_models',
+                                            with open(os.path.join('model_store', 'saved_models',
                                                                    'best_parameters.pkl'), 'wb') as f:
                                                 pickle.dump(best_parameters, f)
                                             shutil.make_archive(
-                                                os.path.join('src', 'model_store', 'compressed_model', 'best_model_' +
+                                                os.path.join('model_store', 'compressed_model', 'best_model_' +
                                                              str(round(rmse, 3)).replace('.', '_')),
-                                                'zip', os.path.join('src', 'model_store', 'saved_models'))
+                                                'zip', os.path.join('model_store', 'saved_models'))
                                         print(best_parameters)
                                 else:
                                     print(algorithm_supervised + ' - ' + algorithm_imput + ' - ' +
@@ -157,12 +157,12 @@ class Train:
                                             'activated_pca': act_pca,
                                             'n_components_pca': 0
                                         }
-                                        with open(os.path.join('src', 'model_store', 'saved_models',
+                                        with open(os.path.join('model_store', 'saved_models',
                                                                'best_parameters.pkl'), 'wb') as f:
                                             pickle.dump(best_parameters, f)
                                         shutil.make_archive(
-                                            os.path.join('src', 'model_store', 'compressed_model', 'best_model_' +
+                                            os.path.join('model_store', 'compressed_model', 'best_model_' +
                                                          str(round(rmse, 3)).replace('.', '_')),
-                                            'zip', os.path.join('src', 'model_store', 'saved_models'))
+                                            'zip', os.path.join('model_store', 'saved_models'))
                                     print(best_parameters)
             return rmse, mae, df

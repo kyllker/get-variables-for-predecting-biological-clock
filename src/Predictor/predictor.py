@@ -2,6 +2,7 @@ import zipfile
 import pandas as pd
 import pickle
 import os
+import shutil
 
 
 class Predictor:
@@ -120,8 +121,21 @@ class Predictor:
             list_predicts = [model.predict(dataframe) for model in list_models]
             return [sum(sub_list) / len(sub_list) for sub_list in zip(*list_predicts)]
 
+    @staticmethod
+    def remove_files_from_folder(path_folder):
+        for filename in os.listdir(path_folder):
+            file_path = os.path.join(path_folder, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))
+
     def predict(self, dataframe, path_model):
-        path_best_model = os.path.join('src', 'model_store', 'best_model')
+        path_best_model = os.path.join('model_store', 'best_model')
+        self.remove_files_from_folder()
         with zipfile.ZipFile(path_model, 'r') as zip_ref:
             zip_ref.extractall(path_best_model)
 
@@ -147,4 +161,4 @@ class Predictor:
         df_result = pd.DataFrame(columns=['ID_Muestra', 'Predict'])
         df_result['ID_Muestra'] = id_muestra
         df_result['Predict'] = res_predict
-        return df_result
+        df_result.to_csv(os.path.join('Results', 'PredictedResults.csv'), index=False)

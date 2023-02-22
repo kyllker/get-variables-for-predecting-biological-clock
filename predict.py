@@ -17,6 +17,5 @@ class Predict:
 
     def predict(self):
         predictor_object = Predictor()
-        df_result = predictor_object.predict(self.df_predict, self.path_model)
-        return df_result
+        predictor_object.predict(self.df_predict, self.path_model)
 

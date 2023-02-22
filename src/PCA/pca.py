@@ -22,7 +22,7 @@ class PCAModel:
             pca = sk_pca(n_components=ncomponents, random_state=self.seed)
             array_pca = pca.fit_transform(x_train_no_edad)
             pca_columns = x_train_no_edad.columns.values.tolist()
-            with open(os.path.join('src', 'model_store', 'saved_models', 'pca', 'pca_model.pkl'), 'wb') as f:
+            with open(os.path.join('model_store', 'saved_models', 'pca', 'pca_model.pkl'), 'wb') as f:
                 pickle.dump([pca, pca_columns], f)
             df_pca = pd.DataFrame(array_pca)
             if edad_cronologica:

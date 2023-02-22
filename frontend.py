@@ -20,9 +20,7 @@ class Frontend:
         self.filename_model = ''
         self.window = tk.Tk()
         self.window.geometry("1800x850")
-
         self.window.title('Get Variables for Predecting Biological Clocks')
-
         tk.Label(self.window, text="    TRAIN", font='Helvetica 15').pack(pady=20, side="top", anchor="w")
 
         # Create a Text Box
@@ -33,7 +31,8 @@ class Frontend:
         self.sheet_name.pack(pady=20, side="top", anchor="w")
 
         self.button_excel_file = tk.Button(self.window, text='Select Excel File with Data',
-                                      command=lambda: self.upload_action_excel_file(self.retrieve_input(self.sheet_name)))
+                                           command=lambda: self.upload_action_excel_file(
+                                               self.retrieve_input(self.sheet_name)))
         self.button_excel_file.pack(pady=20, side="top", anchor="w")
 
         self.label_data_loaded = tk.Label(self.window, text="")
@@ -72,11 +71,11 @@ class Frontend:
         self.ids_test = []
 
         self.check_random_test = tk.IntVar()
-        frame = tk.Frame(self.window).pack(side=tk.TOP)
-        tk.Label(frame, text="If you want specific test, you can upload txt \n "
+        frame_upload_ids = tk.Frame(self.window).pack(side=tk.TOP)
+        tk.Label(frame_upload_ids, text="If you want specific test, you can upload txt \n "
                              "with ids test, else you can train with random test").pack(anchor="w")
 
-        self.check_random_test_button = tk.Checkbutton(frame, text="Random", variable=self.check_random_test,
+        self.check_random_test_button = tk.Checkbutton(frame_upload_ids, text="Random", variable=self.check_random_test,
                                                        onvalue=1, offvalue=0)
         self.check_random_test_button.pack(anchor="w")
         self.button_ids_file = tk.Button(self.window, text='Select Txt File with ids for testing',
@@ -336,13 +335,13 @@ class Frontend:
             label_metric.pack(pady=0, side="top", anchor="w")
             label_metric.place(x=680, y=450)
 
-            frame = tk.Frame(self.window)
-            frame.pack(pady=0, side="top", anchor="w")
-            frame.place(x=680, y=500)
-            table = Table(frame, showtoolbar=True, showstatusbar=True)
-            table.importCSV(os.path.join('Results', label_name + '_PredictedVsTrue.csv'))
-            table.autoResizeColumns()
-            table.show()
+            frame_table_train = tk.Frame(self.window)
+            frame_table_train.pack(pady=0, side="top", anchor="w")
+            frame_table_train.place(x=680, y=500)
+            table_train = Table(frame_table_train, showtoolbar=True, showstatusbar=True)
+            table_train.importCSV(os.path.join('Results', label_name + '_PredictedVsTrue.csv'))
+            table_train.autoResizeColumns()
+            table_train.show()
 
         else:
             if len(self.desired_columns) > 0:
@@ -370,13 +369,13 @@ class Frontend:
             label_metric.pack(pady=0, side="top", anchor="w")
             label_metric.place(x=680, y=450)
 
-            frame = tk.Frame(self.window)
-            frame.pack(pady=0, side="top", anchor="w")
-            frame.place(x=680, y=500)
-            table = Table(frame, showtoolbar=True, showstatusbar=True)
-            table.importCSV(os.path.join('Results', label_name + '_PredictedVsTrue.csv'))
-            table.autoResizeColumns()
-            table.show()
+            frame_table_train_all = tk.Frame(self.window)
+            frame_table_train_all.pack(pady=0, side="top", anchor="w")
+            frame_table_train_all.place(x=680, y=500)
+            table_train_all = Table(frame_table_train_all, showtoolbar=True, showstatusbar=True)
+            table_train_all.importCSV(os.path.join('Results', label_name + '_PredictedVsTrue.csv'))
+            table_train_all.autoResizeColumns()
+            table_train_all.show()
             tk.messagebox.showinfo(title="Train finished", message="Train is finished successfully")
 
     def train_all_parameters(self):
@@ -463,6 +462,19 @@ class Frontend:
             table.importCSV(os.path.join('Results', label_name + '_PredictedVsTrue.csv'))
             table.show()
             tk.messagebox.showinfo(title="Train finished", message="Train is finished successfully")
+
+    def predict_dataset(self):
+        id_column = self.retrieve_input(self.id_text_predict)
+        predict_object = Predict(self.df_data_predict, id_column, self.filename_model)
+        predict_object.predict()
+        frame_table_predict = tk.Frame(self.window)
+        frame_table_predict.pack(pady=0, side="top", anchor="w")
+        frame_table_predict.place(x=1280, y=500)
+        table_predict = Table(frame_table_predict, showtoolbar=True, showstatusbar=True)
+        table_predict.importCSV(os.path.join('Results', 'PredictedVsTrue.csv'))
+        table_predict.autoResizeColumns()
+        table_predict.show()
+        tk.messagebox.showinfo(title="Predict finished", message="Predict is finished successfully")
 
     def start(self) -> None:
         self.window.mainloop()
