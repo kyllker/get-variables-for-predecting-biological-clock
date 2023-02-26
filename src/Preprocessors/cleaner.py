@@ -13,15 +13,18 @@ class Cleaner:
         self.imputer = Imputer(seed)
 
     @staticmethod
-    def filter_desired_columns(dataframe, list_columns_with_order):
+    def filter_desired_columns(dataframe, list_columns_with_name, id_column):
+
         try:
+            if id_column in list_columns_with_name:
+                list_columns_with_name.remove(id_column)
             with open(
-                os.path.join('src', 'model_store', 'saved_models', 'cleaner', 'columns_before_imput.pkl'),
+                os.path.join('model_store', 'saved_models', 'cleaner', 'columns_before_imput.pkl'),
                     'wb') as f:
-                pickle.dump(list_columns_with_order, f)
-            return dataframe.iloc[:, list_columns_with_order]
+                pickle.dump(list_columns_with_name, f)
+            return dataframe.loc[:, list_columns_with_name]
         except:
-            with open(os.path.join('src', 'model_store', 'saved_models', 'cleaner', 'columns_before_imput.pkl'),
+            with open(os.path.join('model_store', 'saved_models', 'cleaner', 'columns_before_imput.pkl'),
                       'wb') as f:
                 pickle.dump(dataframe.columns.values.tolist(), f)
             return dataframe
@@ -66,7 +69,7 @@ class Cleaner:
                     dataframe = dataframe.drop(columns=[column_name])
         if len(columns_two_different_values) > 0:
             with open(
-                os.path.join('src', 'model_store', 'saved_models', 'cleaner', 'columns_two_different_values.pkl'),
+                os.path.join('model_store', 'saved_models', 'cleaner', 'columns_two_different_values.pkl'),
                     'wb') as f:
                 pickle.dump(columns_two_different_values, f)
         return dataframe
@@ -85,7 +88,7 @@ class Cleaner:
             list_unique_values = list(dataframe[dataframe.columns[index_column]].unique())
             list_column_dummy = [dataframe.columns[index_column], list_unique_values]
             with open(
-                    os.path.join('src', 'model_store', 'saved_models', 'cleaner', 'dummies',
+                    os.path.join('model_store', 'saved_models', 'cleaner', 'dummies',
                                  'dummy_column_' + dataframe.columns[index_column] + '.pkl'),
                     'wb') as f:
                 pickle.dump(list_column_dummy, f)
@@ -130,15 +133,15 @@ class Cleaner:
                 normalized_dataframe.loc[:, column_name] = \
                     (normalized_dataframe[column_name] - normalized_dataframe[column_name].min()) / \
                     (normalized_dataframe[column_name].max() - normalized_dataframe[column_name].min())
-        with open(os.path.join('src', 'model_store', 'saved_models', 'cleaner', 'normalize_columns.pkl'),
+        with open(os.path.join('model_store', 'saved_models', 'cleaner', 'normalize_columns.pkl'),
                   'wb') as f:
             pickle.dump(list_columns_normalized, f)
         return normalized_dataframe
 
-    def predict(self, dataframe, list_columns_with_order, id_column, algorithm='knn'):
+    def predict(self, dataframe, list_columns_with_names, id_column, algorithm='knn'):
         id_muestra = pd.DataFrame(dataframe[id_column])
         dataframe_no_id = dataframe.drop(id_column, axis=1)
-        dataframe_desired_columns = self.filter_desired_columns(dataframe_no_id, list_columns_with_order)
+        dataframe_desired_columns = self.filter_desired_columns(dataframe_no_id, list_columns_with_names, id_column)
         dataframe_numerical_values = \
             self.convert_to_numerical_values_column_with_two_different_values(dataframe_desired_columns)
 
