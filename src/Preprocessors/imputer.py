@@ -138,8 +138,8 @@ class Imputer:
         return model.predict(x_predict)
 
     def predict(self, dataframe, algorithm):
-        for col in dataframe.columns:
-            _ = self.mean_or_mode_regressor(dataframe, dataframe[col], dataframe, col)
+        # for col in dataframe.columns:
+        #     _ = self.mean_or_mode_regressor(dataframe, dataframe[col], dataframe, col)
         if not self.check_there_are_na_values(dataframe):
             return dataframe
         else:

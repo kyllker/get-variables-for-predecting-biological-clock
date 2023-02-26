@@ -206,18 +206,26 @@ class Frontend:
         self.id_text_predict.pack(pady=20, side="top", anchor="w")
         self.id_text_predict.place(x=1280, y=190)
 
+        self.target_name_predict = tk.Label(self.window, text="Type the id name")
+        self.target_name_predict.pack(pady=0, side="top", anchor="w")
+        self.target_name_predict.place(x=1280, y=220)
+        self.target_text_predict = tk.Text(self.window, width=20, height=1)
+        self.target_text_predict.insert(tk.INSERT, "DNAmGrimAge")
+        self.target_text_predict.pack(pady=20, side="top", anchor="w")
+        self.target_text_predict.place(x=1280, y=250)
+
         self.button_model_predict = tk.Button(self.window, text='Select Model', command=lambda: self.upload_model())
         self.button_model_predict.pack(pady=20, side="top", anchor="w")
-        self.button_model_predict.place(x=1280, y=220)
+        self.button_model_predict.place(x=1280, y=300)
 
-        self.button_predict = tk.Button(self.window, text='PREDICT', command=lambda: None)
+        self.button_predict = tk.Button(self.window, text='PREDICT', command=lambda: self.predict_dataset())
         self.button_predict.pack(pady=20, side="top", anchor="w")
-        self.button_predict.place(x=1280, y=260)
+        self.button_predict.place(x=1280, y=340)
 
     def upload_action_excel_file(self, sheet):
         if len(str(sheet)) > 0:
             try:
-                filename = tkinter.filedialog.askopenfilename(title='Open files')
+                filename = tkinter.filedialog.askopenfilename(initialdir="Data", title='Open files')
                 xl_file = pd.ExcelFile(filename)
                 dfs = {sheet_name_upload_action: xl_file.parse(sheet_name_upload_action) for sheet_name_upload_action in xl_file.sheet_names}
                 df = dfs[sheet]
@@ -233,7 +241,7 @@ class Frontend:
     def upload_action_excel_file_predict(self, sheet):
         if len(str(sheet)) > 0:
             try:
-                filename = tkinter.filedialog.askopenfilename(title='Open files')
+                filename = tkinter.filedialog.askopenfilename(initialdir="Data", title='Open files')
                 xl_file = pd.ExcelFile(filename)
                 dfs = {sheet_name_upload_action: xl_file.parse(sheet_name_upload_action)
                        for sheet_name_upload_action in xl_file.sheet_names}
@@ -247,7 +255,7 @@ class Frontend:
 
     def upload_action_desired_columns(self):
             try:
-                filename = tkinter.filedialog.askopenfilename(title='Open files')
+                filename = tkinter.filedialog.askopenfilename(initialdir="Data", title='Open files')
                 with open(filename) as f:
                     readed_columns = [line.replace('\n', '') for line in f.readlines()]
             except:
@@ -255,20 +263,20 @@ class Frontend:
 
             if self.opcion_desired_columns.get() == 2:
                 try:
-                    self.desired_columns = [int(col) for col in readed_columns]
+                    columns_with_orger = [int(col) for col in readed_columns]
+                    self.desired_columns = [self.df_data.columns.values.tolist()[col] for col in columns_with_orger]
                 except:
                     tk.messagebox.showerror('No numeric columns', 'There are some columns no numeric')
             elif self.opcion_desired_columns.get() == 3:
                 try:
-                    self.desired_columns = \
-                        [self.df_data.columns.values.tolist().index(column_name) for column_name in readed_columns]
+                    self.desired_columns = [column_name for column_name in readed_columns]
 
                 except:
                     tk.messagebox.showerror('No numeric columns', 'There are some columns no numeric')
 
     def upload_action_ids_test(self):
             try:
-                filename = tkinter.filedialog.askopenfilename(title='Open files')
+                filename = tkinter.filedialog.askopenfilename(initialdir="Data", title='Open files')
                 with open(filename) as f:
                     readed_ids = [line.replace('\n', '') for line in f.readlines()]
             except:
@@ -280,7 +288,7 @@ class Frontend:
 
     def upload_model(self):
             try:
-                self.filename_model = tkinter.filedialog.askopenfilename(title='Open files')
+                self.filename_model = tkinter.filedialog.askopenfilename(initialdir="model_store", title='Open files')
             except:
                 tk.messagebox.showerror('Text file Error', 'Error: It is not available')
 
@@ -465,13 +473,14 @@ class Frontend:
 
     def predict_dataset(self):
         id_column = self.retrieve_input(self.id_text_predict)
-        predict_object = Predict(self.df_data_predict, id_column, self.filename_model)
+        target = self.retrieve_input(self.target_text_predict)
+        predict_object = Predict(self.df_data_predict, id_column, target, self.filename_model)
         predict_object.predict()
         frame_table_predict = tk.Frame(self.window)
         frame_table_predict.pack(pady=0, side="top", anchor="w")
         frame_table_predict.place(x=1280, y=500)
         table_predict = Table(frame_table_predict, showtoolbar=True, showstatusbar=True)
-        table_predict.importCSV(os.path.join('Results', 'PredictedVsTrue.csv'))
+        table_predict.importCSV(os.path.join('Results', 'PredictedResults.csv'))
         table_predict.autoResizeColumns()
         table_predict.show()
         tk.messagebox.showinfo(title="Predict finished", message="Predict is finished successfully")

@@ -13,13 +13,16 @@ class Cleaner:
         self.imputer = Imputer(seed)
 
     @staticmethod
-    def filter_desired_columns(dataframe, list_columns_with_order):
+    def filter_desired_columns(dataframe, list_columns_with_name, id_column):
+
         try:
+            if id_column in list_columns_with_name:
+                list_columns_with_name.remove(id_column)
             with open(
                 os.path.join('model_store', 'saved_models', 'cleaner', 'columns_before_imput.pkl'),
                     'wb') as f:
-                pickle.dump(list_columns_with_order, f)
-            return dataframe.iloc[:, list_columns_with_order]
+                pickle.dump(list_columns_with_name, f)
+            return dataframe.loc[:, list_columns_with_name]
         except:
             with open(os.path.join('model_store', 'saved_models', 'cleaner', 'columns_before_imput.pkl'),
                       'wb') as f:
@@ -135,10 +138,10 @@ class Cleaner:
             pickle.dump(list_columns_normalized, f)
         return normalized_dataframe
 
-    def predict(self, dataframe, list_columns_with_order, id_column, algorithm='knn'):
+    def predict(self, dataframe, list_columns_with_names, id_column, algorithm='knn'):
         id_muestra = pd.DataFrame(dataframe[id_column])
         dataframe_no_id = dataframe.drop(id_column, axis=1)
-        dataframe_desired_columns = self.filter_desired_columns(dataframe_no_id, list_columns_with_order)
+        dataframe_desired_columns = self.filter_desired_columns(dataframe_no_id, list_columns_with_names, id_column)
         dataframe_numerical_values = \
             self.convert_to_numerical_values_column_with_two_different_values(dataframe_desired_columns)
 

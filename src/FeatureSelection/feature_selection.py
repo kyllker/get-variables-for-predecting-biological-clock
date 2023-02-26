@@ -65,8 +65,7 @@ class FeatureSelection:
         dataframe_big_variance = self.drop_columns_little_variance(dataframe_no_id, threshold_variance)
         dataframe_ml_selection = \
             self.feature_selection_with_ml_algorithms(dataframe_big_variance, target, threshold_importance)
-        with open(os.path.join('model_store', 'saved_models', 'feature_selection',
-                               self.name_column_target + '_columns_selected_' +
+        with open(os.path.join('model_store', 'saved_models', 'feature_selection', 'columns_selected_' +
                                str(threshold_variance).replace('.', '') + '_'
                                + str(threshold_importance).replace('.', '') + '.pkl'), 'wb') as f:
             pickle.dump(dataframe_ml_selection.columns.values.tolist(), f)

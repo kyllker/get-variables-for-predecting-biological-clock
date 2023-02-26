@@ -58,11 +58,12 @@ class Train:
                 'activated_pca': self.parameters.get('activated_pca'),
                 'n_components_pca': self.parameters.get('n_components_pca')
             }
-            with open(os.path.join('model_store', 'saved_models', 'best_parameters.pkl'), 'wb') as f:
+            with open(os.path.join('model_store', 'saved_models', self.name_column_target + '_best_parameters.pkl'),
+                      'wb') as f:
                 pickle.dump(best_parameters, f)
 
             shutil.make_archive(
-                    os.path.join('model_store', 'compressed_model', 'best_model_',
+                    os.path.join('model_store', 'compressed_model', self.name_column_target + '_best_model_' +
                                  str(round(rmse, 3)).replace('.', '_')), 'zip',
                     os.path.join('model_store', 'saved_models'))
             return rmse, mae, df
@@ -118,11 +119,12 @@ class Train:
                                                 'n_components_pca': ncom
                                             }
                                             with open(os.path.join('model_store', 'saved_models',
-                                                                   'best_parameters.pkl'), 'wb') as f:
+                                                                   self.name_column_target + '_best_parameters.pkl'),
+                                                      'wb') as f:
                                                 pickle.dump(best_parameters, f)
                                             shutil.make_archive(
-                                                os.path.join('model_store', 'compressed_model', 'best_model_' +
-                                                             str(round(rmse, 3)).replace('.', '_')),
+                                                os.path.join('model_store', 'compressed_model', self.name_column_target
+                                                             + '_best_model_' + str(round(rmse, 3)).replace('.', '_')),
                                                 'zip', os.path.join('model_store', 'saved_models'))
                                         print(best_parameters)
                                 else:
@@ -158,10 +160,12 @@ class Train:
                                             'n_components_pca': 0
                                         }
                                         with open(os.path.join('model_store', 'saved_models',
-                                                               'best_parameters.pkl'), 'wb') as f:
+                                                               self.name_column_target + '_best_parameters.pkl'),
+                                                  'wb') as f:
                                             pickle.dump(best_parameters, f)
                                         shutil.make_archive(
-                                            os.path.join('model_store', 'compressed_model', 'best_model_' +
+                                            os.path.join('model_store', 'compressed_model', self.name_column_target +
+                                                         '_best_model_' +
                                                          str(round(rmse, 3)).replace('.', '_')),
                                             'zip', os.path.join('model_store', 'saved_models'))
                                     print(best_parameters)

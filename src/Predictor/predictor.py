@@ -19,7 +19,18 @@ class Predictor:
     def desired_columns_before_all(self, dataframe, path_best_model):
         list_columns_desired = \
             self.load_pickle(os.path.join(path_best_model, "cleaner", "columns_before_imput.pkl"))
-        return dataframe.iloc[:, list_columns_desired]
+        return dataframe.loc[:, list_columns_desired]
+
+    @staticmethod
+    def remove_duplicate_columns(dataframe):
+        return dataframe.loc[:, ~dataframe.apply(lambda x: x.duplicated(), axis=1).all()].copy()
+
+    @staticmethod
+    def remove_constant_columns(dataframe):
+        for column in dataframe.columns:
+            if len(dataframe[column].unique()) == 1:
+                dataframe = dataframe.drop(columns=[column])
+        return dataframe
 
     def convert_dummies(self, dataframe, path_best_model):
         dataframe = dataframe.reset_index(drop=True)
@@ -68,7 +79,14 @@ class Predictor:
                 model_and_columns = \
                     self.load_pickle(
                         os.path.join(path_best_model, 'imputer', algorithm_imput + '_regressor_' + column + '.pkl'))
-                df_aux = dataframe.loc[:, model_and_columns[1]].reset_index(drop=True)
+                listcolumns = model_and_columns[1]
+                list_cols_dataframe = dataframe.columns.values.tolist()
+                try:
+                    df_aux = dataframe.loc[:, model_and_columns[1]].reset_index(drop=True)
+                except:
+                    listcolumns = [col for col in listcolumns if col in list_cols_dataframe]
+                    df_aux = dataframe.loc[:, listcolumns].reset_index(drop=True)
+
                 if df_aux.isna().sum().sum() > 0:
                     for col in df_aux.columns:
                         if df_aux[col].isna().sum().sum() > 0:
@@ -95,29 +113,33 @@ class Predictor:
 
         return dataframe.loc[:, list_columns_selection]
 
-    def pca_predict(self, dataframe, path_best_model):
+    def pca_predict(self, dataframe, path_best_model, best_parameters):
         pca_model = \
-            self.load_pickle(os.path.join(path_best_model, "pca", "pca_model.pkl"))
+            self.load_pickle(os.path.join(path_best_model, "pca", "pca_model_" +
+                                          str(best_parameters.get('n_components_pca')) + ".pkl"))
         edad_cronologica = pd.DataFrame(dataframe['Edad_Cronologica'])
         dataframe_no_edad = dataframe.loc[:, pca_model[1]]
         df_pca = pd.DataFrame(pca_model[0].transform(dataframe_no_edad))
         df_reduced_dimensionality = pd.concat([edad_cronologica, df_pca], 1)
         return df_reduced_dimensionality
 
-    def supervised_model_predict(self, path_best_model, dataframe, model='Linear'):
+    def supervised_model_predict(self, path_best_model, dataframe, model, target_name):
         if model != 'Ensemble':
             if model == 'Linear':
                 model = \
-                    self.load_pickle(os.path.join(path_best_model, "supervised_models", model + "_model.pkl"))
+                    self.load_pickle(os.path.join(path_best_model, "supervised_models",
+                                                  target_name + '_' + model + "_model.pkl"))
             elif model == 'XGBoost':
                 model = \
-                    self.load_pickle(os.path.join(path_best_model, "supervised_models", model + "_model.pkl"))
+                    self.load_pickle(os.path.join(path_best_model, "supervised_models",
+                                                  target_name + '_' + model + "_model.pkl"))
             return model.predict(dataframe)
         else:
             list_models_path = os.listdir(os.path.join(path_best_model, "supervised_models"))
             list_models = []
             for model in list_models_path:
-                list_models.append(self.load_pickle(os.path.join(path_best_model, "supervised_models", model)))
+                list_models.append(self.load_pickle(os.path.join(path_best_model, "supervised_models",
+                                                                 target_name + '_' + model)))
             list_predicts = [model.predict(dataframe) for model in list_models]
             return [sum(sub_list) / len(sub_list) for sub_list in zip(*list_predicts)]
 
@@ -133,21 +155,23 @@ class Predictor:
             except Exception as e:
                 print('Failed to delete %s. Reason: %s' % (file_path, e))
 
-    def predict(self, dataframe, path_model):
+    def predict(self, dataframe, id_column, target_name, path_model):
         path_best_model = os.path.join('model_store', 'best_model')
-        self.remove_files_from_folder()
+        self.remove_files_from_folder(path_best_model)
         with zipfile.ZipFile(path_model, 'r') as zip_ref:
             zip_ref.extractall(path_best_model)
 
-        best_parameters = self.load_pickle(os.path.join(path_best_model, "best_parameters.pkl"))
+        best_parameters = self.load_pickle(os.path.join(path_best_model, target_name + "_best_parameters.pkl"))
         print(best_parameters)
 
-        id_muestra = list(dataframe['ID_Muestra'])
-        dataframe_no_id = dataframe.drop('ID_Muestra', axis=1)
+        id_muestra = list(dataframe[id_column])
+        dataframe_no_id = dataframe.drop(id_column, axis=1)
         dataframe_desired_columns = self.desired_columns_before_all(dataframe_no_id, path_best_model)
         dataframe_dummies = self.convert_dummies(dataframe_desired_columns, path_best_model)
+        dataframe_no_duplicates = self.remove_duplicate_columns(dataframe_dummies)
+        dataframe_no_constants = self.remove_constant_columns(dataframe_no_duplicates)
         dataframe_normalized = \
-            self.normalized_columns(dataframe_dummies, path_best_model)
+            self.normalized_columns(dataframe_no_constants, path_best_model)
         dataframe_no_nas = \
             self.imputer_predict(dataframe_normalized, path_best_model, best_parameters.get('algorithm_imput'))
 
@@ -155,10 +179,10 @@ class Predictor:
             self.feature_selection_predict(dataframe_no_nas, path_best_model, best_parameters)
 
         if best_parameters.get('activated_pca'):
-            dataframe_feature_selection = self.pca_predict(dataframe_feature_selection, path_best_model)
+            dataframe_feature_selection = self.pca_predict(dataframe_feature_selection, path_best_model, best_parameters)
         res_predict = self.supervised_model_predict(
-            path_best_model, dataframe_feature_selection, best_parameters.get('algorithm_supervised'))
-        df_result = pd.DataFrame(columns=['ID_Muestra', 'Predict'])
-        df_result['ID_Muestra'] = id_muestra
+            path_best_model, dataframe_feature_selection, best_parameters.get('algorithm_supervised'), target_name)
+        df_result = pd.DataFrame(columns=[id_column, 'Predict'])
+        df_result[id_column] = id_muestra
         df_result['Predict'] = res_predict
         df_result.to_csv(os.path.join('Results', 'PredictedResults.csv'), index=False)
