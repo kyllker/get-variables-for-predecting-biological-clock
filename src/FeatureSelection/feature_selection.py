@@ -36,6 +36,7 @@ class FeatureSelection:
         }
         estimator_dict = {}
         importance_features_sorted_all = pd.DataFrame()
+        best_5_features = []
         for model_name, model in model_dict.items():
             x_model = x_model.astype(float)
             model.fit(x_model, y_model)
@@ -52,22 +53,27 @@ class FeatureSelection:
             importance_features_sorted_all = importance_features_sorted_all.append(importance_features_sorted)
             estimator_dict[model_name] = model
             importance_features_sorted_all['feature'] = importance_features_sorted_all.index
+
         importance_features_sorted_all = importance_features_sorted_all.reset_index(drop=True)
         df_important_threshold = \
             importance_features_sorted_all[importance_features_sorted_all['ranking'] < threshold_importance]
+        df_best_5_features = importance_features_sorted_all[importance_features_sorted_all['ranking'] <= 5]
         selection_features = list(df_important_threshold.feature.unique())
-
-        return dataframe.loc[:, selection_features]
+        best_5_features = list(set(list(df_best_5_features['feature'])))
+        if len(best_5_features) > 15:
+            best_5_features = best_5_features[:15]
+        best_5_features = [best_5_features[:5], best_5_features[5:10], best_5_features[10:15]]
+        return dataframe.loc[:, selection_features], best_5_features
 
     def predict(self, dataframe, target, id_column, threshold_variance=0.05, threshold_importance=0.3):
         id_muestra = pd.DataFrame(dataframe[id_column])
         dataframe_no_id = dataframe.drop(id_column, axis=1)
         dataframe_big_variance = self.drop_columns_little_variance(dataframe_no_id, threshold_variance)
-        dataframe_ml_selection = \
+        dataframe_ml_selection, best_5_features = \
             self.feature_selection_with_ml_algorithms(dataframe_big_variance, target, threshold_importance)
         with open(os.path.join('model_store', 'saved_models', 'feature_selection', 'columns_selected_' +
                                str(threshold_variance).replace('.', '') + '_'
                                + str(threshold_importance).replace('.', '') + '.pkl'), 'wb') as f:
             pickle.dump(dataframe_ml_selection.columns.values.tolist(), f)
         cleaned_dataframe = pd.concat([id_muestra, dataframe_ml_selection], 1)
-        return cleaned_dataframe
+        return cleaned_dataframe, best_5_features

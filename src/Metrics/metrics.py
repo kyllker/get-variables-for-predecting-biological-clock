@@ -3,7 +3,7 @@ import os
 import sys
 import math
 import numpy as np
-from sklearn.metrics import mean_squared_error, mean_absolute_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from matplotlib import pyplot
 import warnings
 warnings.filterwarnings('ignore')
@@ -36,6 +36,7 @@ class Metrics:
         print(df_results)
         rmse = math.sqrt(mean_squared_error(list(df_results['Predict']), list(df_results['True'])))
         mae = mean_absolute_error(list(df_results['True']), list(df_results['Predict']))
+        r2 = r2_score(list(df_results['True']), list(df_results['Predict']))
         print('El rmse entre el ' + algorithm_supervised + ' model y el reloj biológico DNAmGrimAge es: ' + str(rmse))
         errors = list()
         for i in range(len(list(df_results['Predict']))):
@@ -50,7 +51,7 @@ class Metrics:
         f.clear()
         pyplot.close(f)
 
-        return rmse, mae, df_results
+        return rmse, mae, r2, df_results
 
 
 

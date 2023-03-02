@@ -185,4 +185,4 @@ class Predictor:
         df_result = pd.DataFrame(columns=[id_column, 'Predict'])
         df_result[id_column] = id_muestra
         df_result['Predict'] = res_predict
-        df_result.to_csv(os.path.join('Results', 'PredictedResults.csv'), index=False)
+        df_result.to_csv(os.path.join('Results', target_name + '_PredictedResults.csv'), index=False)

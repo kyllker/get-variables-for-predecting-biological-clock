@@ -36,20 +36,20 @@ class Train:
             #       algorithm_imput: ['mean_mode', 'knn', 'linear', 'svm', 'xgboost', 'ensemble']
             #       algorithm_supervised: ['Linear', 'XGBoost', 'LightGBM', 'Ensemble']
 
-            rmse, mae, df = ensemble_object.predict(df=self.df_data,
-                                                    list_columns=self.list_columns,
-                                                    target=self.target,
-                                                    id_column=self.name_id_column,
-                                                    # ids_test=[15, 23, 34, 52, 48, 44, 42, 21, 45, 60, 6, 5],
-                                                    ids_test=self.ids_test,
-                                                    algorithm_imput=self.parameters.get('algorithm_imput'),
-                                                    threshold_variance=self.parameters.get('threshold_variance'),
-                                                    threshold_importance=self.parameters.get('threshold_importance'),
-                                                    seed=42,
-                                                    algorithm_supervised=self.parameters.get('algorithm_supervised'),
-                                                    activated_pca=self.parameters.get('activated_pca'),
-                                                    n_components_pca=self.parameters.get('n_components_pca')
-                                                    )
+            rmse, mae, r2, df, best_5_features = ensemble_object.predict(
+                df=self.df_data,
+                list_columns=self.list_columns,
+                target=self.target,
+                id_column=self.name_id_column,
+                ids_test=self.ids_test,
+                algorithm_imput=self.parameters.get('algorithm_imput'),
+                threshold_variance=self.parameters.get('threshold_variance'),
+                threshold_importance=self.parameters.get('threshold_importance'),
+                seed=42,
+                algorithm_supervised=self.parameters.get('algorithm_supervised'),
+                activated_pca=self.parameters.get('activated_pca'),
+                n_components_pca=self.parameters.get('n_components_pca')
+            )
             best_parameters = {
                 'algorithm_imput': self.parameters.get('algorithm_imput'),
                 'threshold_variance': self.parameters.get('threshold_variance'),
@@ -66,20 +66,20 @@ class Train:
                     os.path.join('model_store', 'compressed_model', self.name_column_target + '_best_model_' +
                                  str(round(rmse, 3)).replace('.', '_')), 'zip',
                     os.path.join('model_store', 'saved_models'))
-            return rmse, mae, df
+            return rmse, mae, r2, df, best_5_features
 
         else:
             best_parameters = {}
-            algorithms_imput = ['mean_mode', 'knn', 'linear', 'svm', 'xgboost', 'ensemble']
-            # algorithms_imput = ['knn', 'linear', 'svm', 'xgboost']
+            # algorithms_imput = ['mean_mode', 'knn', 'linear', 'svm', 'xgboost', 'ensemble']
+            algorithms_imput = ['knn', 'linear', 'svm', 'xgboost']
             threshold_variances = [0.01, 0.05, 0.07]
             threshold_importances = [20, 30, 50]
-            algorithms_supervised = ['Linear', 'XGBoost', 'Ensemble']
-            # algorithms_supervised = ['Linear', 'XGBoost']
-            bool_pca = [False, True]
-            # bool_pca = [True]
+            # algorithms_supervised = ['Linear', 'XGBoost', 'Ensemble']
+            algorithms_supervised = ['Linear', 'XGBoost']
+            # bool_pca = [False, True]
+            bool_pca = [True]
             ncomponents_pca = [5, 10, 20, 50]
-            min_rmse = 2.2
+            min_rmse = 3
             for act_pca in bool_pca:
                 for algorithm_supervised in algorithms_supervised:
                     for algorithm_imput in algorithms_imput:
@@ -90,7 +90,7 @@ class Train:
                                         print(algorithm_supervised + ' - ' + algorithm_imput + ' - ' +
                                               str(threshold_variance) + ' - ' + str(threshold_importance) + ' - ' +
                                               str(ncom) + ' - ' + str(act_pca))
-                                        rmse, mae, df = ensemble_object.predict(
+                                        rmse, mae, r2, df, best_5_features = ensemble_object.predict(
                                             df=self.df_data,
                                             list_columns=self.list_columns,
                                             target=self.target,
@@ -131,7 +131,7 @@ class Train:
                                     print(algorithm_supervised + ' - ' + algorithm_imput + ' - ' +
                                           str(threshold_variance) + ' - ' + str(threshold_importance) + ' - ' +
                                           str(0) + ' - ' + str(act_pca))
-                                    rmse, mae, df = ensemble_object.predict(
+                                    rmse, mae, r2, df, best_5_features = ensemble_object.predict(
                                         df=self.df_data,
                                         list_columns=self.list_columns,
                                         target=self.target,
@@ -169,4 +169,4 @@ class Train:
                                                          str(round(rmse, 3)).replace('.', '_')),
                                             'zip', os.path.join('model_store', 'saved_models'))
                                     print(best_parameters)
-            return rmse, mae, df
+            return rmse, mae, r2, df, best_5_features

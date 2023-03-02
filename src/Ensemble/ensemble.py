@@ -62,7 +62,7 @@ class Ensemble:
         df_cleaned = self.cleaner_object.predict(df, list_columns, id_column, algorithm_imput)
         print('Cleaned dataframe')
         print(df_cleaned.shape)
-        df_feature_selection = self.feature_selection_object.predict(
+        df_feature_selection, best_5_features = self.feature_selection_object.predict(
             df_cleaned, target, id_column, threshold_variance, threshold_importance)
         print('Feature selection dataframe')
         print(df_feature_selection.shape)
@@ -78,4 +78,5 @@ class Ensemble:
         list_supervided_result = self.supervised_model_object.predict(x_train, y_train, x_test, id_column,
                                                                       seed, algorithm_supervised)
         list_result = [list_supervided_result[0], list_supervided_result[1], list(y_test)]
-        return self.metric_object.predict(list_result, algorithm_supervised)
+        rmse, mae, r2, df_results = self.metric_object.predict(list_result, algorithm_supervised)
+        return rmse, mae, r2, df_results, best_5_features
