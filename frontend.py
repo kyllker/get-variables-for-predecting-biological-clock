@@ -329,7 +329,7 @@ class Frontend:
                                  parameters=self.parameters,
                                  individual_all='Individual',
                                  ids_test=ids_test)
-            rmse, mae, df = train_object.predict()
+            rmse, mae, r2, df, best_5_features = train_object.predict()
             tk.messagebox.showinfo(title="Train finished", message="Train is finished successfully")
             image1 = Image.open(os.path.join('Results', label_name + '_graphics.png'))
             image1 = image1.resize((480, 360), Image.ANTIALIAS)
@@ -337,11 +337,17 @@ class Frontend:
 
             image_display = tkinter.Label(image=img)
             image_display.image = img
-            image_display.place(x=680, y=50)
+            image_display.place(x=680, y=20)
 
-            label_metric = tk.Label(self.window, text="RMSE: " + str(round(rmse, 3)) + "\nMAE: " + str(round(mae, 3)))
+            label_features = tk.Label(self.window, text="The main features are: \n" + str(best_5_features[0]) +
+                                      '\n' + str(best_5_features[1]) + '\n' + str(best_5_features[2]))
+            label_features.pack(pady=0, side="top", anchor="w")
+            label_features.place(x=680, y=390)
+
+            label_metric = tk.Label(self.window, text="RMSE: " + str(round(rmse, 3)) + "\tMAE: " + str(round(mae, 3))
+                                    + "\tR2: " + str(round(r2, 3)))
             label_metric.pack(pady=0, side="top", anchor="w")
-            label_metric.place(x=680, y=450)
+            label_metric.place(x=680, y=470)
 
             frame_table_train = tk.Frame(self.window)
             frame_table_train.pack(pady=0, side="top", anchor="w")
@@ -363,7 +369,7 @@ class Frontend:
                                  parameters=self.parameters,
                                  individual_all='Individual',
                                  ids_test=self.ids_test)
-            rmse, mae, df = train_object.predict()
+            rmse, mae, r2, df, best_5_features = train_object.predict()
 
             image1 = Image.open(os.path.join('Results', label_name + '_graphics.png'))
             image1 = image1.resize((480, 360), Image.ANTIALIAS)
@@ -371,11 +377,16 @@ class Frontend:
 
             image_display = tkinter.Label(image=img)
             image_display.image = img
-            image_display.place(x=680, y=50)
+            image_display.place(x=680, y=20)
 
-            label_metric = tk.Label(self.window, text="RMSE: " + str(round(rmse, 3)) + "\nMAE: " + str(round(mae, 3)))
+            label_features = tk.Label(self.window, text="The main features are: \n" + str(best_5_features[0]) +
+                                                        '\n' + str(best_5_features[1]) + '\n' + str(best_5_features[2]))
+            label_features.pack(pady=0, side="top", anchor="w")
+            label_features.place(x=680, y=390)
+            label_metric = tk.Label(self.window, text="RMSE: " + str(round(rmse, 3)) + "\tMAE: " + str(round(mae, 3))
+                                    + "\tR2: " + str(round(r2, 3)))
             label_metric.pack(pady=0, side="top", anchor="w")
-            label_metric.place(x=680, y=450)
+            label_metric.place(x=680, y=470)
 
             frame_table_train_all = tk.Frame(self.window)
             frame_table_train_all.pack(pady=0, side="top", anchor="w")
@@ -416,7 +427,7 @@ class Frontend:
                                  parameters=self.parameters,
                                  individual_all='All',
                                  ids_test=ids_test)
-            rmse, mae, df = train_object.predict()
+            rmse, mae, r2, df, best_5_features = train_object.predict()
             tk.messagebox.showinfo(title="Train finished", message="Train is finished successfully")
             image1 = Image.open(os.path.join('Results', label_name + '_graphics.png'))
             image1 = image1.resize((480, 360), Image.ANTIALIAS)
@@ -424,15 +435,21 @@ class Frontend:
 
             image_display = tkinter.Label(image=img)
             image_display.image = img
-            image_display.place(x=800, y=50)
+            image_display.place(x=680, y=20)
 
-            label_metric = tk.Label(self.window, text="RMSE: " + str(round(rmse, 3)) + "\nMAE: " + str(round(mae, 3)))
+            label_features = tk.Label(self.window, text="The main features are: \n" + str(best_5_features[0]) +
+                                                        '\n' + str(best_5_features[1]) + '\n' + str(best_5_features[2]))
+            label_features.pack(pady=0, side="top", anchor="w")
+            label_features.place(x=680, y=390)
+
+            label_metric = tk.Label(self.window, text="RMSE: " + str(round(rmse, 3)) + "\tMAE: " + str(round(mae, 3))
+                                    + "\tR2: " + str(round(r2, 3)))
             label_metric.pack(pady=0, side="top", anchor="w")
-            label_metric.place(x=800, y=450)
+            label_metric.place(x=680, y=470)
 
             frame = tk.Frame(self.window)
             frame.pack(pady=0, side="top", anchor="w")
-            frame.place(x=800, y=500)
+            frame.place(x=680, y=500)
             table = Table(frame, showtoolbar=True, showstatusbar=True)
             table.importCSV(os.path.join('Results', label_name + '_PredictedVsTrue.csv'))
             table.show()
@@ -449,7 +466,7 @@ class Frontend:
                                  parameters=self.parameters,
                                  individual_all='All',
                                  ids_test=self.ids_test)
-            rmse, mae, df = train_object.predict()
+            rmse, mae, r2, df, best_5_features = train_object.predict()
 
             image1 = Image.open(os.path.join('Results', label_name + '_graphics.png'))
             image1 = image1.resize((480, 360), Image.ANTIALIAS)
@@ -457,15 +474,21 @@ class Frontend:
 
             image_display = tkinter.Label(image=img)
             image_display.image = img
-            image_display.place(x=800, y=50)
+            image_display.place(x=680, y=20)
 
-            label_metric = tk.Label(self.window, text="RMSE: " + str(round(rmse, 3)) + "\nMAE: " + str(round(mae, 3)))
+            label_features = tk.Label(self.window, text="The main features are: \n" + str(best_5_features[0]) +
+                                                        '\n' + str(best_5_features[1]) + '\n' + str(best_5_features[2]))
+            label_features.pack(pady=0, side="top", anchor="w")
+            label_features.place(x=680, y=390)
+
+            label_metric = tk.Label(self.window, text="RMSE: " + str(round(rmse, 3)) + "\tMAE: " + str(round(mae, 3))
+                                    + "\tR2: " + str(round(r2, 3)))
             label_metric.pack(pady=0, side="top", anchor="w")
-            label_metric.place(x=800, y=450)
+            label_metric.place(x=680, y=470)
 
             frame = tk.Frame(self.window)
             frame.pack(pady=0, side="top", anchor="w")
-            frame.place(x=800, y=500)
+            frame.place(x=680, y=500)
             table = Table(frame, showtoolbar=True, showstatusbar=True)
             table.importCSV(os.path.join('Results', label_name + '_PredictedVsTrue.csv'))
             table.show()
@@ -480,7 +503,7 @@ class Frontend:
         frame_table_predict.pack(pady=0, side="top", anchor="w")
         frame_table_predict.place(x=1280, y=500)
         table_predict = Table(frame_table_predict, showtoolbar=True, showstatusbar=True)
-        table_predict.importCSV(os.path.join('Results', 'PredictedResults.csv'))
+        table_predict.importCSV(os.path.join('Results', target + '_PredictedResults.csv'))
         table_predict.autoResizeColumns()
         table_predict.show()
         tk.messagebox.showinfo(title="Predict finished", message="Predict is finished successfully")
