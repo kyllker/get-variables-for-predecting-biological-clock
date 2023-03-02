@@ -33,6 +33,6 @@ class TestFeatureSelection:
         df_iris = pd.DataFrame(data=np.c_[x, y],
                                columns=self.iris['feature_names'] + ['target'])
 
-        df_res = self.feature_selection_object.feature_selection_with_ml_algorithms(df_iris.iloc[:, :-1], y, 50)
+        df_res, best_5_features = self.feature_selection_object.feature_selection_with_ml_algorithms(df_iris.iloc[:, :-1], y, 50)
         assert set(list(df_res)) == \
                set(['petal length (cm)', 'petal width (cm)', 'sepal length (cm)', 'sepal width (cm)'])
