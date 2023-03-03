@@ -14,10 +14,9 @@ class Cleaner:
 
     @staticmethod
     def filter_desired_columns(dataframe, list_columns_with_name, id_column):
-
+        if id_column in list_columns_with_name:
+            list_columns_with_name.remove(id_column)
         try:
-            if id_column in list_columns_with_name:
-                list_columns_with_name.remove(id_column)
             with open(
                 os.path.join('model_store', 'saved_models', 'cleaner', 'columns_before_imput.pkl'),
                     'wb') as f:
@@ -105,6 +104,8 @@ class Cleaner:
                         df_with_dummies.loc[
                             df_with_dummies[column_name + '_' + str(value)] == value, column_name + '_' + str(
                                 value)] = 1
+                        df_with_dummies[column_name + '_' + str(value)] = \
+                            df_with_dummies[column_name + '_' + str(value)].astype(int)
                     else:
                         new_column = new_column.rename(columns={column_name: column_name + '_nan'})
                         df_with_dummies = pd.concat([df_with_dummies, new_column], 1)
@@ -112,6 +113,8 @@ class Cleaner:
                             df_with_dummies[df_with_dummies.columns[index_column]].isna(), column_name + '_nan'] = 1
                         df_with_dummies.loc[df_with_dummies[df_with_dummies.columns[
                             index_column]].isna() == False, column_name + '_nan'] = 0
+                        df_with_dummies[column_name + '_nan'] = \
+                            df_with_dummies[column_name + '_nan'].astype(int)
         for index_column in list_columns_non_numerical_values:
             column_name = dataframe.columns[index_column]
             df_with_dummies = df_with_dummies.drop(columns=[column_name])

@@ -120,9 +120,9 @@ class Imputer:
         return clf.predict(x_predict)
 
     def xgboost_classifier(self, x_train, y_train, x_predict, column_name):
-        model = XGBClassifier(n_estimators=1000, max_depth=7, eta=0.1, subsample=0.7, colsample_bytree=0.8,
-                              random_state=self.seed)
-        model.fit(x_train, y_train)
+        model = XGBClassifier(random_state=self.seed)
+        x_train_np = x_train.to_numpy()
+        model.fit(x_train_np, y_train)
         with open(os.path.join('model_store', 'saved_models', 'imputer', 'xgboost_classifier_' + column_name + '.pkl'),
                   'wb') as f:
             pickle.dump([model, x_train.columns.values.tolist()], f)
