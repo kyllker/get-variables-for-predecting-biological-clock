@@ -20,7 +20,7 @@ class Metrics:
     def round_2_decimals(number):
         return round(number, 2)
 
-    def predict(self, list_result, algorithm_supervised='Linear'):
+    def predict(self, list_result):
         self.list_result = list_result
         df_results = pd.DataFrame()
         df_results['ID'] = self.list_result[0]
@@ -37,7 +37,6 @@ class Metrics:
         rmse = math.sqrt(mean_squared_error(list(df_results['Predict']), list(df_results['True'])))
         mae = mean_absolute_error(list(df_results['True']), list(df_results['Predict']))
         r2 = r2_score(list(df_results['True']), list(df_results['Predict']))
-        print('El rmse entre el ' + algorithm_supervised + ' model y el reloj biológico DNAmGrimAge es: ' + str(rmse))
         errors = list()
         for i in range(len(list(df_results['Predict']))):
             err = (list(df_results['Predict'])[i] - list(df_results['True'])[i]) ** 2

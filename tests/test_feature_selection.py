@@ -36,3 +36,14 @@ class TestFeatureSelection:
         df_res, best_5_features = self.feature_selection_object.feature_selection_with_ml_algorithms(df_iris.iloc[:, :-1], y, 50)
         assert set(list(df_res)) == \
                set(['petal length (cm)', 'petal width (cm)', 'sepal length (cm)', 'sepal width (cm)'])
+
+    def test_feature_selection_predict(self):
+        x, y = load_iris(return_X_y=True)
+        df_iris = pd.DataFrame(data=np.c_[x, y],
+                               columns=self.iris['feature_names'] + ['target'])
+        df_iris['ID'] = [i for i in range(df_iris.shape[0])]
+        train_columns = df_iris.columns.values.tolist()[:-2] + ['ID']
+        df_res, best_5_features = self.feature_selection_object.predict(df_iris.loc[:, train_columns], y, 'ID', 0.05, 50)
+        print(df_res.columns)
+        assert set(df_res.columns.values.tolist()) == \
+               set(['ID', 'petal length (cm)', 'petal width (cm)', 'sepal length (cm)', 'sepal width (cm)'])

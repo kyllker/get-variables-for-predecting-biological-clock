@@ -34,9 +34,9 @@ class SupervisedModel:
                                 return_train_score=True
                                 )
         model_cv.fit(x_train, y_train)
-        with open(os.path.join('model_store', 'saved_models', 'supervised_models',
-                               self.name_column_target + '_Linear_model.pkl'), 'wb') as f:
-            pickle.dump(model_cv, f)
+        # with open(os.path.join('model_store', 'saved_models', 'supervised_models',
+        #                        self.name_column_target + '_Linear_model.pkl'), 'wb') as f:
+        #     pickle.dump(model_cv, f)
         return model_cv
 
     def xgboost_model(self, x_train, y_train):

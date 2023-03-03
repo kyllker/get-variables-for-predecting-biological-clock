@@ -42,10 +42,10 @@ class Ensemble:
         return x_train, x_test, y_train, y_test
 
     @staticmethod
-    def split_train_test_manual(dataframe, target, ids_test=[0]):
+    def split_train_test_manual(dataframe, target, id_column, ids_test=[0]):
         dataframe['target'] = target
-        df_train = dataframe[~dataframe['ID_Muestra'].isin(ids_test)]
-        df_test = dataframe[dataframe['ID_Muestra'].isin(ids_test)]
+        df_train = dataframe[~dataframe[id_column].isin(ids_test)]
+        df_test = dataframe[dataframe[id_column].isin(ids_test)]
         y_train = df_train['target']
         y_test = df_test['target']
         x_train = df_train.drop('target', axis=1)
@@ -53,11 +53,9 @@ class Ensemble:
         return x_train, x_test, y_train, y_test
 
     def predict(self, df, list_columns, target, id_column, algorithm_imput='knn',
-                threshold_variance=0.05, threshold_importance=0.3, seed=42, algorithm_supervised='Linear',
+                threshold_variance=0.05, threshold_importance=30, seed=42, algorithm_supervised='Linear',
                 ids_test=[], activated_pca=False, n_components_pca=20):
-        # df = self.read_data(filename, sheet)
         print('Initial dataframe')
-
         print(df.shape)
         df_cleaned = self.cleaner_object.predict(df, list_columns, id_column, algorithm_imput)
         print('Cleaned dataframe')
@@ -72,11 +70,10 @@ class Ensemble:
             df_pca = df_feature_selection.copy()
         print('PCA dataframe')
         print(df_pca.shape)
-        # x_train, x_test, y_train, y_test = self.split_train_test_random(df_pca, target, seed)
-        x_train, x_test, y_train, y_test = self.split_train_test_manual(df_pca, target, ids_test)
+        x_train, x_test, y_train, y_test = self.split_train_test_manual(df_pca, target, id_column, ids_test)
         print("Size X_train="+str(x_train.shape) + " Size X_test="+str(x_test.shape))
         list_supervided_result = self.supervised_model_object.predict(x_train, y_train, x_test, id_column,
                                                                       seed, algorithm_supervised)
         list_result = [list_supervided_result[0], list_supervided_result[1], list(y_test)]
-        rmse, mae, r2, df_results = self.metric_object.predict(list_result, algorithm_supervised)
+        rmse, mae, r2, df_results = self.metric_object.predict(list_result)
         return rmse, mae, r2, df_results, best_5_features
