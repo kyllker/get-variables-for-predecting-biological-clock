@@ -23,6 +23,8 @@ class Cleaner:
                 pickle.dump(list_columns_with_name, f)
             return dataframe.loc[:, list_columns_with_name]
         except:
+            print(os.getcwd())
+            print(os.listdir(os.getcwd()))
             with open(os.path.join('model_store', 'saved_models', 'cleaner', 'columns_before_imput.pkl'),
                       'wb') as f:
                 pickle.dump(dataframe.columns.values.tolist(), f)
