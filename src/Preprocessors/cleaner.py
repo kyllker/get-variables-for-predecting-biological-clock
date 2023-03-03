@@ -86,6 +86,7 @@ class Cleaner:
         for index_column in list_columns_non_numerical_values:
             list_unique_values = list(dataframe[dataframe.columns[index_column]].unique())
             list_column_dummy = [dataframe.columns[index_column], list_unique_values]
+
             with open(
                     os.path.join('model_store', 'saved_models', 'cleaner', 'dummies',
                                  'dummy_column_' + dataframe.columns[index_column] + '.pkl'),
