@@ -28,9 +28,12 @@ class Imputer:
         dataframe_sum_na = dataframe.isna().sum()
         dataframe_nas_by_column = dataframe_sum_na.loc[lambda x: x > 0]
         list_na_columns = list(dataframe_nas_by_column.sort_values(ascending=True).index)
-        with open(os.path.join('model_store', 'saved_models', 'imputer', 'order_columns_imputer.pkl'),
+        try:
+            with open(os.path.join('model_store', 'saved_models', 'imputer', 'order_columns_imputer.pkl'),
                   'wb') as f:
-            pickle.dump(list_na_columns, f)
+                pickle.dump(list_na_columns, f)
+        except FileNotFoundError:
+            print('It is test mode')
         return list_na_columns
 
     @staticmethod

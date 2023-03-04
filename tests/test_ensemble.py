@@ -22,11 +22,6 @@ class TestEnsemble:
     def test_build_an_ensemble_object(self):
         assert isinstance(self.ensemble_object, Ensemble)
 
-    def test_read_data(self):
-        df_res = pd.DataFrame([[1, 2]], columns=['a', 'b'])
-        df = self.ensemble_object.read_data('proof_test.xlsx', 'Sheet1')
-        assert df_res.equals(df)
-
     def test_split_train_test_random(self):
         iris = load_iris()
         x_iris = pd.DataFrame(data=np.c_[iris['data']],

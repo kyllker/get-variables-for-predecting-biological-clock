@@ -22,18 +22,7 @@ class Ensemble:
         self.supervised_model_object = SupervisedModel(seed, name_column_target)
         self.metric_object = Metrics(name_column_target)
         self.seed = seed
-
-    @staticmethod
-    def read_data(filename, sheet):
-        if 'tests' in os.getcwd():
-            xl_file = pd.ExcelFile(os.path.join('..', 'Data', filename))
-        else:
-            xl_file = pd.ExcelFile(os.path.join('Data', filename))
-
-        dfs = {sheet_name: xl_file.parse(sheet_name)
-               for sheet_name in xl_file.sheet_names}
-
-        return dfs[sheet].iloc[:60, :]
+        self.name_column_target = name_column_target
 
     @staticmethod
     def split_train_test_random(dataframe, target, seed):
