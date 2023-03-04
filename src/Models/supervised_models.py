@@ -118,7 +118,6 @@ class SupervisedModel:
         x_test_no_id = x_test.drop(id_column, axis=1)
         x_train_no_id = x_train_no_id.astype(float)
         x_test_no_id = x_test_no_id.astype(float)
-
         if algorithm == 'Linear':
             model = self.linear_model(x_train_no_id, y_train)
             return [id_muestra_test, list(model.predict(x_test_no_id))]
