@@ -32,7 +32,10 @@ class Metrics:
         print('Results shape')
         print(df_results.shape)
         df_results = df_results.round({'ID': 0, 'Predict': 2, 'True': 2})
-        df_results.to_csv(os.path.join('Results', self.name_column_target + '_PredictedVsTrue.csv'), index=False)
+        try:
+            df_results.to_csv(os.path.join('Results', self.name_column_target + '_PredictedVsTrue.csv'), index=False)
+        except FileNotFoundError:
+            print('It is test mode')
         print(df_results)
         rmse = math.sqrt(mean_squared_error(list(df_results['Predict']), list(df_results['True'])))
         mae = mean_absolute_error(list(df_results['True']), list(df_results['Predict']))
@@ -46,7 +49,10 @@ class Metrics:
         pyplot.xticks(ticks=[i for i in range(len(errors))], labels=list(df_results['Predict']))
         pyplot.xlabel('Predicted Value')
         pyplot.ylabel('Mean Squared Error')
-        pyplot.savefig(os.path.join('Results', self.name_column_target + '_graphics.png'))
+        try:
+            pyplot.savefig(os.path.join('Results', self.name_column_target + '_graphics.png'))
+        except FileNotFoundError:
+            print('It is test mode')
         f.clear()
         pyplot.close(f)
 
