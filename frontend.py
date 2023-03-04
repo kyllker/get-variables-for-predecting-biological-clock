@@ -453,7 +453,6 @@ class Frontend:
             table = Table(frame, showtoolbar=True, showstatusbar=True)
             table.importCSV(os.path.join('Results', label_name + '_PredictedVsTrue.csv'))
             table.show()
-
         else:
             if len(self.desired_columns) > 0:
                 list_columns = self.desired_columns
