@@ -7,9 +7,13 @@ There are these folders: Data, Results, src and tests.
 
     - Data: this folder is empty in github but you have to move your xlsx to this folder
 
+    - model_store: folder where you save models
+
     - Results: 
 
         - Prediction and true patients in csv
+
+        - Only prediction result if it is in predict mode
 
         - Graphic with result
 
@@ -20,16 +24,25 @@ There are these folders: Data, Results, src and tests.
         - experimental_notebook: fast proofs for understanding the problem to resolve
     
         - FeatureSelection: It is the step where you reduce the features to get the most important features
+
+        - Metrics: for calculating RMSE, MAE and R2
      
         - Models: It is the folder where you execute models about predictions when the data is cleaned
+
+        - PCA: if you want to predict with PCA you can do it and you can select components
+
+        - Predictor: when you have trained you can predict new data with this class
     
         - Preprocessors: It is the folder with the scripts about clean and imput variables
 
 
     - tests: test for trying functions with base cases
 
-    - proof_code.py:  script to test the whole flow and get results 
+    - frontend.py: code with graphic application
 
+    - train.py: all code for training mode
+
+    - predict.py: all code for predicting mode
 
 There are also:
     
@@ -82,8 +95,12 @@ We put a threshold and get the variables more importance than that threshold.
 
 We remove the duplicated variables of that list to get a list with unique values
 
+## Step3: PCA
 
-## Step3: ML MODELS TO PREDICT BIOLOGICAL CLOCK
+Optional mode but it usually gets more accuracy
+
+
+## Step4: ML MODELS TO PREDICT BIOLOGICAL CLOCK
 
 As we have cleaned data and reduced data we can apply supervised models
 
@@ -101,17 +118,15 @@ I choose the following models:
 We choose the best hyperparameters and we can ensemble both of them
 
 
-## Step4: METRICS, RMSE AND GRAPHICS
+## Step4: METRICS, RMSE, MAE, R2 AND GRAPHICS
 
 As it is a regression model, we choose rmse as metric and we can show results in a graphic too
 
 Files are in:
 
-    - Results/graphics.png
+    - Results/BiologicalClock_graphics.png
 
-    - Results/PredictedVsTrue.csv
+    - Results/BiologicalClock_PredictedVsTrue.csv
 
+    - Results/BiologicalClock_PredictedResults.csv
 
-## RESULTS
-
-Best result is in progress
