@@ -77,6 +77,7 @@ docs/_build
 .ipynb_checkpoints/
 /deployments/.terraform/
 *.terrafrom*
+model_store/saved_models/*
 
 deployments/.terraform.lock.hcl
 
