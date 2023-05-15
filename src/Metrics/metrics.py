@@ -46,8 +46,8 @@ class Metrics:
             errors.append(err)
         f = pyplot.figure()
         pyplot.plot(errors)
-        pyplot.xticks(ticks=[i for i in range(len(errors))], labels=list(df_results['Predict']))
-        pyplot.xlabel('Predicted Value')
+        pyplot.xticks(ticks=[i for i in range(len(errors))], labels=list(df_results['True']))
+        pyplot.xlabel('True Value')
         pyplot.ylabel('Mean Squared Error')
         try:
             pyplot.savefig(os.path.join('Results', self.name_column_target + '_graphics.png'))
