@@ -80,7 +80,8 @@ docs/_build
 model_store/saved_models/*
 
 deployments/.terraform.lock.hcl
-
+*.zip
+*.pkl
 
 # DataFiles
 *.xlsx

@@ -36,7 +36,6 @@ class FeatureSelection:
         }
         estimator_dict = {}
         importance_features_sorted_all = pd.DataFrame()
-        best_5_features = []
         for model_name, model in model_dict.items():
             x_model = x_model.astype(float)
             model.fit(x_model, y_model)
@@ -71,9 +70,16 @@ class FeatureSelection:
         dataframe_big_variance = self.drop_columns_little_variance(dataframe_no_id, threshold_variance)
         dataframe_ml_selection, best_5_features = \
             self.feature_selection_with_ml_algorithms(dataframe_big_variance, target, threshold_importance)
-        with open(os.path.join('model_store', 'saved_models', 'feature_selection', 'columns_selected_' +
-                               str(threshold_variance).replace('.', '') + '_'
-                               + str(threshold_importance).replace('.', '') + '.pkl'), 'wb') as f:
-            pickle.dump(dataframe_ml_selection.columns.values.tolist(), f)
+        try:
+            with open(os.path.join('model_store', 'saved_models', 'feature_selection', 'columns_selected_' +
+                                   str(threshold_variance).replace('.', '') + '_'
+                                   + str(threshold_importance).replace('.', '') + '.pkl'), 'wb') as f:
+                pickle.dump(dataframe_ml_selection.columns.values.tolist(), f)
+        except:
+            os.mkdir(os.path.join('model_store', 'saved_models', 'feature_selection'))
+            with open(os.path.join('model_store', 'saved_models', 'feature_selection', 'columns_selected_' +
+                                   str(threshold_variance).replace('.', '') + '_'
+                                   + str(threshold_importance).replace('.', '') + '.pkl'), 'wb') as f:
+                pickle.dump(dataframe_ml_selection.columns.values.tolist(), f)
         cleaned_dataframe = pd.concat([id_muestra, dataframe_ml_selection], 1)
         return cleaned_dataframe, best_5_features

@@ -104,13 +104,15 @@ class Frontend:
         self.threshold_importance_value.set(20)
         self.thresh_importance = tk.LabelFrame(self.window, text='Threshold importance')
         self.thresh_importance.pack(pady=20, side="top", anchor="w")
-        self.thresh_importance.place(x=360, y=170)
+        self.thresh_importance.place(x=360, y=160)
         tk.Radiobutton(self.thresh_importance, text='20', variable=self.threshold_importance_value,
                        value=20).pack(side=tk.TOP)
         tk.Radiobutton(self.thresh_importance, text='30', variable=self.threshold_importance_value,
                        value=30).pack(side=tk.TOP)
         tk.Radiobutton(self.thresh_importance, text='50', variable=self.threshold_importance_value,
                        value=50).pack(side=tk.TOP)
+        tk.Radiobutton(self.thresh_importance, text='All', variable=self.threshold_importance_value,
+                       value=1).pack(side=tk.TOP)
 
         self.algorithm_imput_value = tk.StringVar()
         self.algorithm_imput_value.set('knn')

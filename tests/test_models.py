@@ -29,14 +29,14 @@ class TestSupervisedModel:
         df_iris = pd.DataFrame(data=np.c_[x, y],
                                columns=self.iris['feature_names'] + ['target'])
 
-        model = self.supervised_model_object.linear_model(df_iris.iloc[:, :-1], y)
+        model, best_score = self.supervised_model_object.linear_model(df_iris.iloc[:, :-1], y)
         assert isinstance(model, GridSearchCV)
 
     def test_xgboost_model(self):
         x, y = load_iris(return_X_y=True)
         df_iris = pd.DataFrame(data=np.c_[x, y],
                                columns=self.iris['feature_names'] + ['target'])
-        model = self.supervised_model_object.xgboost_model(df_iris.iloc[:, :-1], df_iris['target'])
+        model, best_score = self.supervised_model_object.xgboost_model(df_iris.iloc[:, :-1], df_iris['target'])
         assert isinstance(model, xgb.XGBRegressor)
 
     def test_lightgbm_model(self):
@@ -53,7 +53,7 @@ class TestSupervisedModel:
         x_iris['ID'] = [i for i in range(x_iris.shape[0])]
         y = iris.target
         xtrain, xtest, ytrain, ytest = train_test_split(x_iris, y, test_size=0.15)
-        result = self.supervised_model_object.predict(xtrain, ytrain, xtest, 'ID', 42, 'Linear')
+        result, train_rmse = self.supervised_model_object.predict(xtrain, ytrain, xtest, 'ID', 42, 'Linear')
         assert (len(result[0]) == 23) and (sum([1 for i in result[1] if -1 < i < 2]))
 
 
