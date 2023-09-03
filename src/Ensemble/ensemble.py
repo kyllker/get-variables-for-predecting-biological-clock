@@ -49,20 +49,35 @@ class Ensemble:
         df_cleaned = self.cleaner_object.predict(df, list_columns, id_column, algorithm_imput)
         print('Cleaned dataframe')
         print(df_cleaned.shape)
-        df_feature_selection, best_5_features = self.feature_selection_object.predict(
-            df_cleaned, target, id_column, threshold_variance, threshold_importance)
+        x_train, x_test, y_train, y_test = self.split_train_test_manual(df_cleaned, target, id_column, ids_test)
+        print("Size X_train=" + str(x_train.shape) + " Size X_test=" + str(x_test.shape))
+        # df_feature_selection, best_5_features = self.feature_selection_object.predict(
+        #     df_cleaned, target, id_column, threshold_variance, threshold_importance)
+        if threshold_importance == 1:
+            df_feature_selection = x_train.copy()
+            best_5_features = ['', '', '', '', '']
+        else:
+            df_feature_selection, best_5_features = self.feature_selection_object.predict(
+                x_train, y_train, id_column, threshold_variance, threshold_importance)
+
+        df_test = x_test.loc[:, df_feature_selection.columns.values.tolist()]
         print('Feature selection dataframe')
         print(df_feature_selection.shape)
         if activated_pca:
-            df_pca = self.pca_object.predict(df_feature_selection, id_column, ncomponents=n_components_pca)
+            df_pca, df_test = self.pca_object.predict(df_feature_selection, df_test, id_column,
+                                                      ncomponents=n_components_pca)
         else:
             df_pca = df_feature_selection.copy()
+
         print('PCA dataframe')
         print(df_pca.shape)
-        x_train, x_test, y_train, y_test = self.split_train_test_manual(df_pca, target, id_column, ids_test)
-        print("Size X_train="+str(x_train.shape) + " Size X_test="+str(x_test.shape))
-        list_supervided_result = self.supervised_model_object.predict(x_train, y_train, x_test, id_column,
-                                                                      seed, algorithm_supervised)
+        print('STARTING TRAINING')
+        # x_train, x_test, y_train, y_test = self.split_train_test_manual(df_pca, target, id_column, ids_test)
+        # print("Size X_train="+str(x_train.shape) + " Size X_test="+str(x_test.shape))
+        list_supervided_result, train_rmse = self.supervised_model_object.predict(df_pca,
+                                                                                  y_train,
+                                                                                  df_test, id_column,
+                                                                                  seed, algorithm_supervised)
         list_result = [list_supervided_result[0], list_supervided_result[1], list(y_test)]
         rmse, mae, r2, df_results = self.metric_object.predict(list_result)
-        return rmse, mae, r2, df_results, best_5_features
+        return rmse, mae, r2, df_results, best_5_features, train_rmse

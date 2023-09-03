@@ -90,7 +90,7 @@ class TestEnsemble:
         df_iris = pd.DataFrame(data=np.c_[iris['data']],
                                columns=iris['feature_names'])
         df_iris['ID'] = [i for i in range(df_iris.shape[0])]
-        with mocker.patch(self.prefix_path + path + '.predict', return_value=df_iris):
+        with mocker.patch(self.prefix_path + path + '.predict', return_value=[df_iris, df_iris]):
             result = self.ensemble_object
             yield result
 

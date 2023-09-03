@@ -12,13 +12,13 @@ simplefilter("ignore", category=RuntimeWarning)
 
 
 class Train:
-    def __init__(self, list_columns, df_data, label_name, id_column, parameters, individual_all='Individual', ids_test=[]):
+    def __init__(self, list_columns, df_data, label_name, id_column, parameters, individual_all='Individual',
+                 ids_test=[]):
         self.name_column_target = label_name
         self.name_id_column = id_column
         self.list_columns = list_columns
         self.df_data = df_data
         self.target = list(self.df_data[label_name])
-        print('Readed target')
         self.parameters = parameters
         self.individual_all = individual_all
         self.ids_test = ids_test
@@ -36,7 +36,7 @@ class Train:
             #       algorithm_imput: ['mean_mode', 'knn', 'linear', 'svm', 'xgboost', 'ensemble']
             #       algorithm_supervised: ['Linear', 'XGBoost', 'LightGBM', 'Ensemble']
 
-            rmse, mae, r2, df, best_5_features = ensemble_object.predict(
+            rmse, mae, r2, df, best_5_features, train_rmse = ensemble_object.predict(
                 df=self.df_data,
                 list_columns=self.list_columns,
                 target=self.target,
@@ -69,17 +69,21 @@ class Train:
             return rmse, mae, r2, df, best_5_features
 
         else:
+            df_results = pd.DataFrame(0, index=[i for i in range(385)],
+                                      columns=['Variance', 'Importance', 'Imputer', 'PCA', 'Supervised',
+                                               'TrainRMSE', 'TestRMSE'])
             best_parameters = {}
             # algorithms_imput = ['mean_mode', 'knn', 'linear', 'svm', 'xgboost', 'ensemble']
             algorithms_imput = ['knn', 'linear', 'svm', 'xgboost']
             threshold_variances = [0.01, 0.05, 0.07]
-            threshold_importances = [20, 30, 50]
+            threshold_importances = [20, 30, 50, 1]
             # algorithms_supervised = ['Linear', 'XGBoost', 'Ensemble']
             algorithms_supervised = ['Linear', 'XGBoost']
-            # bool_pca = [False, True]
-            bool_pca = [True]
-            ncomponents_pca = [5, 10, 20, 50]
-            min_rmse = 3
+            bool_pca = [False, True]
+            # bool_pca = [True]
+            ncomponents_pca = [5, 10, 20]
+            min_rmse = 100
+            cont = 0
             for act_pca in bool_pca:
                 for algorithm_supervised in algorithms_supervised:
                     for algorithm_imput in algorithms_imput:
@@ -90,7 +94,7 @@ class Train:
                                         print(algorithm_supervised + ' - ' + algorithm_imput + ' - ' +
                                               str(threshold_variance) + ' - ' + str(threshold_importance) + ' - ' +
                                               str(ncom) + ' - ' + str(act_pca))
-                                        rmse, mae, r2, df, best_5_features = ensemble_object.predict(
+                                        rmse, mae, r2, df, best_5_features, train_rmse = ensemble_object.predict(
                                             df=self.df_data,
                                             list_columns=self.list_columns,
                                             target=self.target,
@@ -104,6 +108,19 @@ class Train:
                                             activated_pca=act_pca,
                                             n_components_pca=ncom
                                             )
+                                        df_results.loc[cont, 'Variance'] = threshold_variance
+                                        df_results.loc[cont, 'Importance'] = threshold_importance
+                                        df_results.loc[cont, 'Imputer'] = algorithm_imput
+                                        df_results.loc[cont, 'PCA'] = ncom
+                                        df_results.loc[cont, 'Supervised'] = algorithm_supervised
+                                        df_results.loc[cont, 'TrainRMSE'] = train_rmse
+                                        df_results.loc[cont, 'TestRMSE'] = rmse
+                                        cont = cont + 1
+                                        if cont % 25 == 0:
+                                            df_results.to_csv(
+                                                os.path.join('model_store',
+                                                             'results_' + self.name_column_target + '.csv'),
+                                                index=False)
                                         print('rmse')
                                         print(rmse)
                                         print('min_rmse')
@@ -131,7 +148,7 @@ class Train:
                                     print(algorithm_supervised + ' - ' + algorithm_imput + ' - ' +
                                           str(threshold_variance) + ' - ' + str(threshold_importance) + ' - ' +
                                           str(0) + ' - ' + str(act_pca))
-                                    rmse, mae, r2, df, best_5_features = ensemble_object.predict(
+                                    rmse, mae, r2, df, best_5_features, train_rmse = ensemble_object.predict(
                                         df=self.df_data,
                                         list_columns=self.list_columns,
                                         target=self.target,
@@ -145,6 +162,18 @@ class Train:
                                         activated_pca=act_pca,
                                         n_components_pca=0
                                     )
+                                    df_results.loc[cont, 'Variance'] = threshold_variance
+                                    df_results.loc[cont, 'Importance'] = threshold_importance
+                                    df_results.loc[cont, 'Imputer'] = algorithm_imput
+                                    df_results.loc[cont, 'PCA'] = 'False'
+                                    df_results.loc[cont, 'Supervised'] = algorithm_supervised
+                                    df_results.loc[cont, 'TrainRMSE'] = train_rmse
+                                    df_results.loc[cont, 'TestRMSE'] = rmse
+                                    if cont % 25 == 0:
+                                        df_results.to_csv(
+                                            os.path.join('model_store',
+                                                         'results_' + self.name_column_target + '.csv'), index=False)
+                                    cont = cont + 1
                                     print('rmse')
                                     print(rmse)
                                     print('min_rmse')
@@ -169,4 +198,7 @@ class Train:
                                                          str(round(rmse, 3)).replace('.', '_')),
                                             'zip', os.path.join('model_store', 'saved_models'))
                                     print(best_parameters)
+            df_results.to_csv(
+                os.path.join('model_store',
+                             'results' + self.name_column_target + '.csv'), index=False)
             return rmse, mae, r2, df, best_5_features

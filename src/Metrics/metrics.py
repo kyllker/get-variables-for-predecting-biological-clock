@@ -29,15 +29,14 @@ class Metrics:
         df_results['True'] = self.list_result[2]
         df_results['True'] = df_results['True'].apply(self.round_2_decimals)
         df_results = df_results.sort_values(by=['True'])
-        print('Results shape')
-        print(df_results.shape)
         df_results = df_results.round({'ID': 0, 'Predict': 2, 'True': 2})
         try:
             df_results.to_csv(os.path.join('Results', self.name_column_target + '_PredictedVsTrue.csv'), index=False)
         except FileNotFoundError:
             print('It is test mode')
-        print(df_results)
         rmse = math.sqrt(mean_squared_error(list(df_results['Predict']), list(df_results['True'])))
+        print('TestRMSE')
+        print(rmse)
         mae = mean_absolute_error(list(df_results['True']), list(df_results['Predict']))
         r2 = r2_score(list(df_results['True']), list(df_results['Predict']))
         errors = list()

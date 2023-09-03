@@ -16,19 +16,24 @@ class Cleaner:
     def filter_desired_columns(dataframe, list_columns_with_name, id_column):
         if id_column in list_columns_with_name:
             list_columns_with_name.remove(id_column)
+        contained_columns = [col_name for col_name in list_columns_with_name
+                             if col_name in dataframe.columns.values.tolist()]
+        if len(contained_columns) > 0:
+            desired_dataframe = dataframe.loc[:, contained_columns]
+        else:
+            desired_dataframe = dataframe.copy()
         try:
             with open(
                 os.path.join('model_store', 'saved_models', 'cleaner', 'columns_before_imput.pkl'),
                     'wb') as f:
-                pickle.dump(list_columns_with_name, f)
-            return dataframe.loc[:, list_columns_with_name]
+                pickle.dump(contained_columns, f)
+            return desired_dataframe
         except:
-            print(os.getcwd())
-            print(os.listdir(os.getcwd()))
+            os.mkdir(os.path.join('model_store', 'saved_models', 'cleaner'))
             with open(os.path.join('model_store', 'saved_models', 'cleaner', 'columns_before_imput.pkl'),
                       'wb') as f:
-                pickle.dump(dataframe.columns.values.tolist(), f)
-            return dataframe
+                pickle.dump(contained_columns, f)
+            return desired_dataframe
 
     @staticmethod
     def remove_duplicate_columns(dataframe):
