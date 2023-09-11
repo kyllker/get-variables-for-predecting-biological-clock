@@ -66,6 +66,9 @@ class Train:
                     os.path.join('model_store', 'compressed_model', self.name_column_target + '_best_model_' +
                                  str(round(rmse, 3)).replace('.', '_')), 'zip',
                     os.path.join('model_store', 'saved_models'))
+            df_aux = df.sort_values('ID')
+            print(df_aux)
+            print(list(df_aux['Predict']))
             return rmse, mae, r2, df, best_5_features
 
         else:
@@ -201,4 +204,5 @@ class Train:
             df_results.to_csv(
                 os.path.join('model_store',
                              'results' + self.name_column_target + '.csv'), index=False)
+            print(df['Predict'])
             return rmse, mae, r2, df, best_5_features
