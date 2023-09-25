@@ -290,7 +290,8 @@ class Frontend:
 
     def upload_model(self):
             try:
-                self.filename_model = tkinter.filedialog.askopenfilename(initialdir="model_store", title='Open files')
+                self.filename_model = tkinter.filedialog.askopenfilename(initialdir="model_store/compressed_model",
+                                                                         title='Open files')
             except:
                 tk.messagebox.showerror('Text file Error', 'Error: It is not available')
 
