@@ -76,7 +76,6 @@ class SupervisedModel:
         num_folds = 10
         folds = KFold(n_splits=num_folds, shuffle=True)
         best_estimator = ['']
-        current_mse = 2000
         best_rmse = 2000
         for train_index, test_index in folds.split(x_train):
             x_train_model, x_test = x_train.iloc[train_index, :], x_train.iloc[test_index, :]
@@ -84,7 +83,7 @@ class SupervisedModel:
             y_test = [y_train[i] for i in test_index]
             clf.fit(x_train_model, list(y_train_model))
             i_rmse = mean_squared_error(y_test, clf.predict(x_test))
-            if abs(i_rmse) < abs(current_mse):
+            if abs(i_rmse) < abs(best_rmse):
                 best_estimator[0] = clf.best_estimator_
                 best_rmse = i_rmse
         clf = best_estimator[0]
@@ -127,14 +126,15 @@ class SupervisedModel:
         num_folds = 10
         folds = KFold(n_splits=num_folds, shuffle=True)
         best_estimator = ['']
-        current_mse = 2000
+        best_mse = 2000
         for train_index, test_index in folds.split(x_train):
             x_train_model, x_test = x_train.iloc[train_index, :], x_train.iloc[test_index, :]
             y_train_model = [y_train[i] for i in train_index]
             y_test = [y_train[i] for i in test_index]
             clf.fit(x_train_model, list(y_train_model))
-            if mean_squared_error(y_test, clf.predict(x_test)) < current_mse:
+            if mean_squared_error(y_test, clf.predict(x_test)) < best_mse:
                 best_estimator[0] = clf.best_estimator_
+                best_mse = clf.best_estimator_
         clf = best_estimator[0]
         clf.fit(x_train, list(y_train))
         try:
