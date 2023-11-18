@@ -80,10 +80,12 @@ class SupervisedModel:
         for train_index, test_index in folds.split(x_train):
             x_train_model, x_test = x_train.iloc[train_index, :], x_train.iloc[test_index, :]
             y_train_model = [y_train[i] for i in train_index]
+            y_test = [y_train[i] for i in test_index]
             clf.fit(x_train_model, list(y_train_model))
+            i_rmse = mean_squared_error(y_test, clf.predict(x_test))
             if abs(clf.best_score_) < abs(best_mse):
                 best_estimator[0] = clf.best_estimator_
-                best_mse = clf.best_score_
+                best_mse = i_rmse
         clf = best_estimator[0]
         clf.fit(x_train, list(y_train))
         print('TrainRMSE')

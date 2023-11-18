@@ -80,7 +80,7 @@ class Train:
             algorithms_imput = ['knn', 'linear', 'svm', 'xgboost']
             threshold_variances = [0.01, 0.05, 0.07]
             threshold_importances = [20, 30, 50, 1]
-            algorithms_supervised = ['Linear', 'XGBoost', 'LightGBM']
+            algorithms_supervised = ['Linear', 'XGBoost', 'LightGBM', 'Ensemble']
             bool_pca = [False, True]
             # bool_pca = [True]
             ncomponents_pca = [5, 10, 20]
