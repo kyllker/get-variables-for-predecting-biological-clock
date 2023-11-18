@@ -76,20 +76,18 @@ class SupervisedModel:
         num_folds = 10
         folds = KFold(n_splits=num_folds, shuffle=True)
         best_estimator = ['']
-        best_rmse = 2000
+        best_mse = 2000
         for train_index, test_index in folds.split(x_train):
             x_train_model, x_test = x_train.iloc[train_index, :], x_train.iloc[test_index, :]
             y_train_model = [y_train[i] for i in train_index]
-            y_test = [y_train[i] for i in test_index]
             clf.fit(x_train_model, list(y_train_model))
-            i_rmse = mean_squared_error(y_test, clf.predict(x_test))
-            if abs(i_rmse) < abs(best_rmse):
+            if abs(clf.best_score_) < abs(best_mse):
                 best_estimator[0] = clf.best_estimator_
-                best_rmse = i_rmse
+                best_mse = clf.best_score_
         clf = best_estimator[0]
         clf.fit(x_train, list(y_train))
         print('TrainRMSE')
-        print(abs(math.sqrt(abs(best_rmse))))
+        print(abs(math.sqrt(abs(best_mse))))
         try:
             with open(os.path.join('model_store', 'saved_models', 'supervised_models',
                                    self.name_column_target + '_XGBoost_model.pkl'), 'wb') as f:
@@ -99,7 +97,7 @@ class SupervisedModel:
             with open(os.path.join('model_store', 'saved_models', 'supervised_models',
                                    self.name_column_target + '_XGBoost_model.pkl'), 'wb') as f:
                 pickle.dump(clf, f)
-        return clf, abs(math.sqrt(best_rmse))
+        return clf, abs(math.sqrt(best_mse))
 
     def lightgbm_model(self, x_train, y_train):
         x_train = x_train.reset_index(drop=True)
@@ -132,9 +130,12 @@ class SupervisedModel:
             y_train_model = [y_train[i] for i in train_index]
             y_test = [y_train[i] for i in test_index]
             clf.fit(x_train_model, list(y_train_model))
-            if mean_squared_error(y_test, clf.predict(x_test)) < best_mse:
+            current_mse = mean_squared_error(y_test, clf.predict(x_test))
+            if current_mse < best_mse:
                 best_estimator[0] = clf.best_estimator_
-                best_mse = clf.best_estimator_
+                best_mse = clf.best_score_
+        print('TrainRMSE')
+        print(abs(math.sqrt(abs(best_mse))))
         clf = best_estimator[0]
         clf.fit(x_train, list(y_train))
         try:
@@ -147,7 +148,7 @@ class SupervisedModel:
                                    self.name_column_target + '_LightGBM_model.pkl'), 'wb') as f:
                 pickle.dump(clf, f)
 
-        return clf
+        return clf, abs(math.sqrt(best_mse))
 
     def predict(self, x_train, y_train, x_test, id_column, seed=42, algorithm='Linear'):
         x_train_no_id = x_train.drop(id_column, axis=1)
@@ -162,15 +163,15 @@ class SupervisedModel:
             model, train_rmse = self.xgboost_model(x_train_no_id, y_train)
             return [id_muestra_test, list(model.predict(x_test_no_id))], train_rmse
         elif algorithm == 'LightGBM':
-            model = self.lightgbm_model(x_train_no_id, y_train)
-            return [id_muestra_test, list(model.predict(x_test_no_id))]
+            model, train_rmse = self.lightgbm_model(x_train_no_id, y_train)
+            return [id_muestra_test, list(model.predict(x_test_no_id))], train_rmse
         elif algorithm == 'Ensemble':
             model_linear = self.linear_model(x_train_no_id, y_train)[0]
             model_xgboost = self.xgboost_model(x_train_no_id, y_train)[0]
-            # model_lightgbm = self.lightgbm_model(x_train_no_id, y_train)
-            res_linear = model_linear.predict(x_test_no_id)
-            res_xgboost = model_xgboost.predict(x_test_no_id)
-            # res_lightgbm = model_lightgbm.predict(x_test_no_id)
-            # predictions = [(g + h + j) / 3 for g, h, j in zip(res_linear, res_xgboost, res_lightgbm)]
-            prediction_linear_xg = [(g + h) / 2 for g, h in zip(res_linear, res_xgboost)]
-            return [id_muestra_test, prediction_linear_xg], train_rmse
+            model_lightgbm = self.lightgbm_model(x_train_no_id, y_train)[0]
+            res_linear, train_rmse  = model_linear.predict(x_test_no_id)
+            res_xgboost, train_rmse  = model_xgboost.predict(x_test_no_id)
+            res_lightgbm, train_rmse  = model_lightgbm.predict(x_test_no_id)
+            predictions = [(g + h + j) / 3 for g, h, j in zip(res_linear, res_xgboost, res_lightgbm)]
+            # prediction_linear_xg = [(g + h) / 2 for g, h in zip(res_linear, res_xgboost)]
+            return [id_muestra_test, predictions], train_rmse
