@@ -43,7 +43,7 @@ class TestSupervisedModel:
         x, y = load_iris(return_X_y=True)
         df_iris = pd.DataFrame(data=np.c_[x, y],
                                columns=self.iris['feature_names'] + ['target'])
-        model = self.supervised_model_object.lightgbm_model(df_iris.iloc[:, :-1], df_iris['target'])
+        model = self.supervised_model_object.lightgbm_model(df_iris.iloc[:, :-1], df_iris['target'])[0]
         assert isinstance(model, lgb.LGBMRegressor)
 
     def test_predict(self):
